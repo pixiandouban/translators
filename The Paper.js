@@ -9,17 +9,17 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-23 07:54:19"
+	"lastUpdated": "2021-11-23 15:12:33"
 }
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	if(url.includes('channel')){
-		return "multiple";
-	}
-	else
+	if(url.includes('newsDetail_forward'))
 	{
 		return "newspaperArticle";
+	}
+	else{
+		return "multiple";
 	}
 }
 
@@ -61,7 +61,7 @@ function scrape(doc, url) {
 	Z.debug(tt);
 	item.title=tt;
 	var authors = doc.body.querySelector("div.news_about > p");
-	authors=authors.innerText.replace("澎湃新闻记者 ", "");
+	authors=authors.innerText.replace(/(澎湃新闻记者 |澎湃首席评论员 )/, ""); //remove prefix label
 	Z.debug(authors);
 	item.creators.push(ZU.cleanAuthor((authors), "author"));
 	Z.debug(item.creators);
@@ -114,6 +114,7 @@ function scrape(doc, url) {
 	});
 	*/
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -132,6 +133,16 @@ var testCases = [
 				"date": "2020-12-29"
 			}
 		]
-	}
+	},
+	{
+		"type": "web",
+		"url": "https://www.thepaper.cn/list_27224",
+		"items": "multiple"		
+	},
+	{
+		"type": "web",
+		"url": "https://www.thepaper.cn/searchResult.jsp",
+		"items": "multiple"		
+	}	
 ]
 /** END TEST CASES **/

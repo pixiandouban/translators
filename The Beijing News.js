@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-22 04:30:32"
+	"lastUpdated": "2021-11-23 17:04:22"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -84,18 +83,35 @@ function scrape(doc, url) {
 
 	//item.title = ZU.xpathText(doc, '//head/title');
 	var tt=ZU.xpathText(doc, '//div[@class="bodyTitle"]/div[@class="content"]/h1');
-	item.title = tt;
 	//Z.debug(tt);
+	item.title = tt;
 
 	var authors=ZU.xpathText(doc, '//div[@class="bodyTitle"]//div[@class="fl left-info"]/span[@class="reporter"]/em');
-	//Z.debug(authors);
-	item.creators.push(ZU.cleanAuthor((authors), "author"));
-	//Z.debug(item.creators);
+	Z.debug(authors);
+	var reporters = authors.replace(/[\s]+编辑.*$/, ""); //remove editors
+	reporters = reporters.replace("记者：", "");
+	reporters = reporters.split(/[\s]+/);
+	if(reporters.length > 1){
+		for( i=0; i < reporters.length; i=i+1){
+			item.creators.push(ZU.cleanAuthor((reporters[i]), "author"));			
+		}
+	}
+	else if(reporters.length === 1)
+	{
+		item.creators.push(ZU.cleanAuthor((reporters[0]), "author"));
+	}	
+	Z.debug(reporters);
+	
+	var editors = authors.replace(/^记者.*[\s]+编辑：/, "");
+	Z.debug(editors);
+	item.creators.push(ZU.cleanAuthor((editors), "reviewedAuthor"));
+	Z.debug(item.creators);
 
 	item.language='zh-hans';
 	item.url=url;
 	item.publicationTitle = "新京报";
 	item.CN = "11-0245";
+	item.place = "北京";
 
 	item.abstractNote = ZU.xpathText(doc, '//div[@class="articleCenter"]/div[@class="introduction"]/p');
 	//Z.debug(item.abstractNote);
@@ -136,3 +152,41 @@ function scrape(doc, url) {
 	});
 	*/
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.bjnews.com.cn/news",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.bjnews.com.cn/search?bwsk=%E5%A4%A9%E6%B0%94",
+		"items": "multiple"
+	},	
+	{
+		"type": "web",
+		"url": "https://www.bjnews.com.cn/detail/163755705314858.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"language": "zh-hans",
+				"title": "哀牢山4名失联地质员已遇难 无人机热成像搜寻画面首曝光",
+				"date": "2021-11-22"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bjnews.com.cn/detail/163748938114302.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"language": "zh-hans",				
+				"title": "《吴清源》摄影师王昱追忆和田惠美：她的专业和严谨令人敬畏",
+				"date": "2021-11-21"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

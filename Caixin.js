@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-22 18:01:17"
+	"lastUpdated": "2021-11-23 14:27:04"
 }
 
 function detectWeb(doc, url) {
@@ -75,13 +75,22 @@ function scrape(doc, url) {
 	item.title=tt;
 	//var authors=ZU.xpathText(doc, '//meta[@name="author"]/@content');
 	var authors=doc.getElementById('author_baidu').innerText;
-	authors=authors.replace("作者：", "");
+	authors=authors.replace("作者：", "").split(/[，、]+/);
 	Z.debug(authors);
-	item.creators.push(ZU.cleanAuthor((authors), "author"));
-	//Z.debug(item.creators);
+	if(authors.length > 1){
+		for( i=0; i < authors.length; i=i+1){
+			item.creators.push(ZU.cleanAuthor((authors[i]), "author"));			
+		}
+	}
+	else if(authors.length === 1)
+	{
+		item.creators.push(ZU.cleanAuthor((authors[0]), "author"));
+	}
+	Z.debug(item.creators);
+	
 	item.language='zh-hans';
 	item.url=url;
-	Z.debug(item.url);
+	
 	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	Z.debug(item.abstractNote);
 	item.publicationTitle = "财新 Caixin";
@@ -93,8 +102,7 @@ function scrape(doc, url) {
 		item.date = ZU.strToISO(publicationDate);
 	}
 	Z.debug(publicationDate);
-	
-	//item.accessDate = new Date().toISOString().slice(0, 10);
+	//item.accessDate = new Date().toISOString().slice(0, 10); // Zotero will retrieve automatically	
 	
 	item.attachments.push({
 		title: "Snapshot",
@@ -102,6 +110,7 @@ function scrape(doc, url) {
 	});
 	
 	item.complete();
+	
 	/*
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -125,6 +134,7 @@ function scrape(doc, url) {
 	});
 	*/
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -156,6 +166,18 @@ var testCases = [
 				"itemType": "newspaperArticle",
 				"language": "zh-hans",
 				"title": "B站拿下支付牌照 即将开展直播电商内测",
+				"date": "2021-11-22"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://economy.caixin.com/2021-11-22/101808495.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"language": "zh-hans",				
+				"title": "两名主播偷逃税被查处 直播行业征税难点在哪",
 				"date": "2021-11-22"
 			}
 		]
