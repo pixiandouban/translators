@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-24 07:23:05"
+	"lastUpdated": "2021-11-24 07:32:56"
 }
 
 function detectWeb(doc, url) {
@@ -89,7 +89,7 @@ function scrape(doc, url) {
 	Z.debug("Title: "+tt);
 	item.title=tt;
 	var authors = doc.body.querySelector("div.news_about > p");
-	authors=authors.innerText.replace(/(澎湃新闻记者 |澎湃首席评论员 )/, ""); //remove prefix author type
+	authors=authors.innerText.replace(/(澎湃新闻记者 |澎湃首席评论员 |核查员 )/, ""); //remove prefix author type
 	//Z.debug(authors);
 	if(authors !== null && authors !== "")
 	{
