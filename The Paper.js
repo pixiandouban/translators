@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-24 06:54:28"
+	"lastUpdated": "2021-11-24 07:23:05"
 }
 
 function detectWeb(doc, url) {
@@ -17,13 +17,18 @@ function detectWeb(doc, url) {
 	
 	if(url.includes('newsDetail_forward') )
 	{
-		var channel = doc.body.querySelector("div.newscontent > div.news_path > a").innerText;
-		if(channel !== '澎湃号'){
-			return "newspaperArticle";			
+		var channel = doc.body.querySelector("div.newscontent > div.news_path > a");
+		if (channel !== null){
+			if(channel.innerText !== '澎湃号'){
+				return "newspaperArticle";			
+			}
+			else if (channel.innerText === '澎湃号'){
+				//third-party article
+				return "blogPost";			
+			}
 		}
-		else if (channel === '澎湃号'){
-			//third-party article
-			return "blogPost";			
+		else{
+			return "multiple";
 		}
 	}
 	else{
