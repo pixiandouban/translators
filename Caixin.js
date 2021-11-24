@@ -9,21 +9,23 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-23 14:27:04"
+	"lastUpdated": "2021-11-24 02:44:38"
 }
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	var term= "https://opinion.caixin.com/2021-11-15/101805072.html";
-	var re = new RegExp("/^https:\/\/opinion.caixin*.html$/");
-	if (re.test(term)){
+	//var term= "https://opinion.caixin.com/2021-11-15/101805072.html";
+	var opinionArticle = new RegExp(/^https:\/\/opinion\.{1}caixin.*html$/); //Opinion article
+	/*
+	if (opinionArticle.test(term)){
 		Z.debug("valid");
 	}
 	else{
 		Z.debug("Invalid");
 	}
+	*/
 	
-	if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content') == "article") {
+	if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content') == "article"  || opinionArticle.test(url) ) {
 		return 'newspaperArticle';
 	}	
 	else if(url.includes('blog'))
@@ -70,12 +72,13 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
 	
-	var tt = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
+	var tt = ZU.xpathText(doc, '//meta[@property="og:title"]/@content')
+			 || ZU.xpathText(doc, '//div[@id="the_content"]/div[@id="conTit"]/h1').trim();
 	Z.debug(tt);
 	item.title=tt;
 	//var authors=ZU.xpathText(doc, '//meta[@name="author"]/@content');
 	var authors=doc.getElementById('author_baidu').innerText;
-	authors=authors.replace("作者：", "").split(/[，、]+/);
+	authors=authors.replace("作者：", "").split(/[，、\s]+/);
 	Z.debug(authors);
 	if(authors.length > 1){
 		for( i=0; i < authors.length; i=i+1){
@@ -91,7 +94,8 @@ function scrape(doc, url) {
 	item.language='zh-hans';
 	item.url=url;
 	
-	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
+	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content') 
+						|| ZU.xpathText(doc, '//meta[@name="description"]/@content');
 	Z.debug(item.abstractNote);
 	item.publicationTitle = "财新 Caixin";
 	//item.CN = "44-0003";	
@@ -176,7 +180,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"language": "zh-hans",				
+				"language": "zh-hans",
 				"title": "两名主播偷逃税被查处 直播行业征税难点在哪",
 				"date": "2021-11-22"
 			}
