@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2021-03-01 04:36:11"
+	"lastUpdated": "2021-11-24 05:05:14"
 }
 
 /*
@@ -30,7 +30,7 @@
 
 
 function scrape(doc, url) {
-	const item = new Zotero.Item("webpage");
+	const item = new Zotero.Item("blogPost");
 
 	const ogMetadataCache = new Map();
 	const nodeList = doc.head.querySelectorAll(':scope meta[property^="og:"]');
@@ -39,7 +39,10 @@ function scrape(doc, url) {
 	}
 
 	item.title = ogMetadataCache.get("og:title");
-	item.websiteTitle = ogMetadataCache.get("og:site_name");
+	item.websiteType= 'Wechat Official Accounts Platform';
+	const profileName = doc.querySelector("#js_name").innerText.trim();		
+	item.blogTitle = profileName;
+	//item.websiteTitle = ogMetadataCache.get("og:site_name");
 	//item.url = ogMetadataCache.get("og:url");
 	item.url = url;
 	item.abstractNote = ogMetadataCache.get("og:description");
@@ -58,13 +61,13 @@ function scrape(doc, url) {
 function detectWeb(doc, url) {
 	const ogType = doc.head.querySelector('meta[property="og:type"]');
 	if (ogType && ogType.content === "article") {
-		return "webpage";
+		return "blogPost";
 	}
 	return false;
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) === "webpage") {
+	if (detectWeb(doc, url) === "blogPost") {
 		scrape(doc, url);
 	}
 }
@@ -80,11 +83,12 @@ function getArticleDate(doc) {
 }
 
 function getArticleCreator(doc, authorName) {
+	/*
 	const profileName = doc.querySelector("#js_name").innerText.trim();
 	if (!authorName.length || authorName === profileName) {
 		return [{lastName: profileName, creatorType: "author", fieldMode: 1}];
 	}
-	return [{lastName: authorName, creatorType: "author", fieldMode: 1},
-			{lastName: profileName, creatorType: "author", fieldMode: 1}
-		   ];
+	*/
+	if(authorName.length)
+	return {lastName: authorName, creatorType: "author", fieldMode: 1};
 }
