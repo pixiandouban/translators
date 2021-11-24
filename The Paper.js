@@ -9,22 +9,22 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-24 04:31:23"
+	"lastUpdated": "2021-11-24 06:54:28"
 }
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
 	
-	var channel = doc.body.querySelector("div.newscontent > div.news_path > a").innerText;
-
-	if(url.includes('newsDetail_forward') && channel !== '澎湃号')
+	if(url.includes('newsDetail_forward') )
 	{
-		return "newspaperArticle";
-	}
-	else if(url.includes('newsDetail_forward') && channel === '澎湃号')
-	{
-		//third-party article
-		return "blogPost";
+		var channel = doc.body.querySelector("div.newscontent > div.news_path > a").innerText;
+		if(channel !== '澎湃号'){
+			return "newspaperArticle";			
+		}
+		else if (channel === '澎湃号'){
+			//third-party article
+			return "blogPost";			
+		}
 	}
 	else{
 		return "multiple";
@@ -185,7 +185,7 @@ var testCases = [
 				"date": "2021-11-24"
 			}
 		]
-	},	
+	},
 	{
 		"type": "web",
 		"url": "https://www.thepaper.cn/list_27224",
