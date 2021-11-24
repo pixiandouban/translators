@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-23 17:04:22"
+	"lastUpdated": "2021-11-24 06:42:33"
 }
 
 /*
@@ -87,9 +87,9 @@ function scrape(doc, url) {
 	item.title = tt;
 
 	var authors=ZU.xpathText(doc, '//div[@class="bodyTitle"]//div[@class="fl left-info"]/span[@class="reporter"]/em');
-	Z.debug(authors);
-	var reporters = authors.replace(/[\s]+编辑.*$/, ""); //remove editors
-	reporters = reporters.replace("记者：", "");
+	Z.debug("authors: " + authors);
+	var reporters = authors.replace(/编辑.*$/, ""); //remove editors part
+	reporters = reporters.replace("记者：", "").trim();
 	reporters = reporters.split(/[\s]+/);
 	if(reporters.length > 1){
 		for( i=0; i < reporters.length; i=i+1){
@@ -100,12 +100,12 @@ function scrape(doc, url) {
 	{
 		item.creators.push(ZU.cleanAuthor((reporters[0]), "author"));
 	}	
-	Z.debug(reporters);
+	Z.debug("reporters: "+reporters);
 	
-	var editors = authors.replace(/^记者.*[\s]+编辑：/, "");
-	Z.debug(editors);
+	var editors = authors.replace(/^.*编辑：/, "");
+	Z.debug("editors: " + editors);
 	item.creators.push(ZU.cleanAuthor((editors), "reviewedAuthor"));
-	Z.debug(item.creators);
+	Z.debug("creators: " + item.creators);
 
 	item.language='zh-hans';
 	item.url=url;
@@ -163,7 +163,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.bjnews.com.cn/search?bwsk=%E5%A4%A9%E6%B0%94",
 		"items": "multiple"
-	},	
+	},
 	{
 		"type": "web",
 		"url": "https://www.bjnews.com.cn/detail/163755705314858.html",
@@ -182,7 +182,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"language": "zh-hans",				
+				"language": "zh-hans",
 				"title": "《吴清源》摄影师王昱追忆和田惠美：她的专业和严谨令人敬畏",
 				"date": "2021-11-21"
 			}
