@@ -12,7 +12,6 @@
 	"lastUpdated": "2021-11-22 15:20:09"
 }
 
-// Made by pixiandouban; unfinished
 /*
 	***** BEGIN LICENSE BLOCK *****
 
@@ -106,9 +105,9 @@ function scrape(doc, url) {
 	if (publicationDate) {
 		item.date = ZU.strToISO(publicationDate);
 	}
-	
+
 	//item.tags = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
-	
+
 	//item.accessDate = new Date().toISOString().slice(0, 10);
 
 	item.attachments.push({
@@ -188,9 +187,9 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					}			
+					}
 				]
 			}
 		]
-	}	
+	}
 ]

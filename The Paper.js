@@ -12,19 +12,42 @@
 	"lastUpdated": "2021-11-24 07:32:56"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2020 Pixiandouban <- TODO
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	
+
 	if(url.includes('newsDetail_forward') )
 	{
 		var channel = doc.body.querySelector("div.newscontent > div.news_path > a");
 		if (channel !== null){
 			if(channel.innerText !== '澎湃号'){
-				return "newspaperArticle";			
+				return "newspaperArticle";
 			}
 			else if (channel.innerText === '澎湃号'){
 				//third-party article
-				return "blogPost";			
+				return "blogPost";
 			}
 		}
 		else{
@@ -68,23 +91,23 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	
-	var type = detectWeb(doc, url);	
+
+	var type = detectWeb(doc, url);
 	var item = null;
 	var user = null;
 	if(type === "blogPost")
 	{
-		item = new Zotero.Item("blogPost");		
+		item = new Zotero.Item("blogPost");
 		user = doc.body.querySelectorAll("div.newscontent > div.news_path > a");
 		Z.debug("user: " + user[1].innerText);
 		item.blogTitle = user[1].innerText;
 	}
 	else{
-		item = new Zotero.Item("newspaperArticle");		
+		item = new Zotero.Item("newspaperArticle");
 		item.publicationTitle = "澎湃新闻";
 	}
-	
-	
+
+
 	var tt = ZU.xpathText(doc, '//div[@class="newscontent"]/h1[@class="news_title"]');
 	Z.debug("Title: "+tt);
 	item.title=tt;
@@ -94,16 +117,16 @@ function scrape(doc, url) {
 	if(authors !== null && authors !== "")
 	{
 		Z.debug("author: "+authors);
-		item.creators.push(ZU.cleanAuthor((authors), "author"));		
-		Z.debug("creators: " +item.creators);		
-		
+		item.creators.push(ZU.cleanAuthor((authors), "author"));
+		Z.debug("creators: " +item.creators);
+
 	}
-	
+
 	item.language='zh-CN';
 	item.url=url;
 	item.abstractNote = ZU.xpathText(doc, '//meta[@name="Description"]/@content');
 	Z.debug("abstractNote: " +item.abstractNote);
-	
+
 	item.type = type;
 	/*
 	if(type == "blogPost")
@@ -122,26 +145,26 @@ function scrape(doc, url) {
 	//var publicationDate = ZU.xpathText(doc, "(//div[@class='bd_block'])/span[@id='pubtime_baidu']");
 	//var publicationDate=doc.body.getElementsByClassName('nfzm-content__publish')[0].getAttribute('data-time');
 	if (publicationDate) {
-		Z.debug("datetime: " + publicationDate);		
+		Z.debug("datetime: " + publicationDate);
 		item.date = ZU.strToISO(publicationDate);
 	}
-	
+
 	//item.accessDate = new Date().toISOString().slice(0, 10);
-	
+
 	item.tags=[];
-	
+
 	item.attachments.push({
 		title: "Snapshot",
 		document: doc
 	});
-	
+
 	item.complete();
 	/*
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('6264f091-1e9e-482e-adb8-4eb6bc9ddacf');
 	// translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
 		item.section = "News";
