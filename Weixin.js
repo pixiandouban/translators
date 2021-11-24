@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2021-11-24 05:05:14"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-11-24 06:15:38"
 }
 
 /*
@@ -44,11 +44,13 @@ function scrape(doc, url) {
 	item.blogTitle = profileName;
 	//item.websiteTitle = ogMetadataCache.get("og:site_name");
 	//item.url = ogMetadataCache.get("og:url");
-	item.url = url;
-	item.abstractNote = ogMetadataCache.get("og:description");
+	item.url = url; //short url
+	item.abstractNote = ogMetadataCache.get("og:description");	
+	//item.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
 	item.creators = getArticleCreator(doc, ogMetadataCache.get("og:article:author"));
 	item.date = getArticleDate(doc);
 	//item.accessDate = new Date().toISOString().slice(0, 10); //Zotero will add accessDate automatically.
+	
 	note_content = doc.body.querySelector("#js_content").innerHTML.trim();
 	note_content = note_content.replace(/\"/g, "'");
 	note_content = note_content.replace(/<img .*?src='(.*?)'.*?>/g, "<img src='$1'\/>");
@@ -90,5 +92,5 @@ function getArticleCreator(doc, authorName) {
 	}
 	*/
 	if(authorName.length)
-	return {lastName: authorName, creatorType: "author", fieldMode: 1};
+	return [{lastName: authorName, creatorType: "author", fieldMode: 1}];
 }
