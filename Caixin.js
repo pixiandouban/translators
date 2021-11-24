@@ -9,13 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-24 02:44:38"
+	"lastUpdated": "2021-11-24 03:06:22"
 }
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
 	//var term= "https://opinion.caixin.com/2021-11-15/101805072.html";
-	var opinionArticle = new RegExp(/^https:\/\/opinion\.{1}caixin.*html$/); //Opinion article
+	var opinionArticle = new RegExp(/^https:?\/\/opinion\.{1}caixin.*html$/); //Opinion article
+	var CaixinWeeklyArticle = new RegExp(/^https:?\/\/weekly\.{1}caixin.*html$/); //Caixin Weekly Magazin article
 	/*
 	if (opinionArticle.test(term)){
 		Z.debug("valid");
@@ -24,8 +25,10 @@ function detectWeb(doc, url) {
 		Z.debug("Invalid");
 	}
 	*/
-	
-	if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content') == "article"  || opinionArticle.test(url) ) {
+	if(ZU.xpathText(doc, '//meta[@property="og:type"]/@content') == "article"  && CaixinWeeklyArticle.test(url) ){
+		return 'magazineArticle';
+	}
+	else if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content') == "article"  || opinionArticle.test(url) ) {
 		return 'newspaperArticle';
 	}	
 	else if(url.includes('blog'))
