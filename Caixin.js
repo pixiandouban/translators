@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-24 03:06:22"
+	"lastUpdated": "2021-11-25 09:36:34"
 }
 
 function detectWeb(doc, url) {
@@ -17,14 +17,7 @@ function detectWeb(doc, url) {
 	//var term= "https://opinion.caixin.com/2021-11-15/101805072.html";
 	var opinionArticle = new RegExp(/^https:?\/\/opinion\.{1}caixin.*html$/); //Opinion article
 	var CaixinWeeklyArticle = new RegExp(/^https:?\/\/weekly\.{1}caixin.*html$/); //Caixin Weekly Magazin article
-	/*
-	if (opinionArticle.test(term)){
-		Z.debug("valid");
-	}
-	else{
-		Z.debug("Invalid");
-	}
-	*/
+
 	if(ZU.xpathText(doc, '//meta[@property="og:type"]/@content') == "article"  && CaixinWeeklyArticle.test(url) ){
 		return 'magazineArticle';
 	}
@@ -35,23 +28,29 @@ function detectWeb(doc, url) {
 	{
 		return "blogPost";
 	}
-	else 
+	else if(url.includes('keyword=')) //Only match CaiXin Search webpage, no section channel
 	{
 		return "multiple";
 	}
+	else{
+		return false;
+	}
 }
 
-/*
+
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// TODO: adjust the CSS selector
-	var rows = doc.querySelectorAll('h2>a.title[href*="/article/"]');
+	var rows = doc.querySelectorAll('div[class="searchxt"]');
+	//Z.debug(rows);
 	for (let row of rows) {
 		// TODO: check and maybe adjust
-		let href = row.href;
+		let href = ZU.xpathText(row, '(.//a)/@href');
+		Z.debug(href);
 		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(row.textContent);
+		Z.debug(title);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -59,15 +58,22 @@ function getSearchResults(doc, checkOnly) {
 	}
 	return found ? items : false;
 }
-*/
+
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		//Zotero.selectItems(getSearchResults(doc, false), function (items) {
-		//	if (items) ZU.processDocuments(Object.keys(items), scrape);
-		//});
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
 	}
-	else {//newspaperArticle
+	else if(detectWeb(doc, url) == "newspaperArticle" || detectWeb(doc, url) == "magazineArticle" ){//newspaperArticle or CainXin Weekly magazine
 		scrape(doc, url);
 	}
 }
