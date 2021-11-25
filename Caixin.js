@@ -9,12 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-25 09:36:34"
+	"lastUpdated": "2021-11-25 10:06:50"
 }
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	//var term= "https://opinion.caixin.com/2021-11-15/101805072.html";
 	var opinionArticle = new RegExp(/^https:?\/\/opinion\.{1}caixin.*html$/); //Opinion article
 	var CaixinWeeklyArticle = new RegExp(/^https:?\/\/weekly\.{1}caixin.*html$/); //Caixin Weekly Magazin article
 
@@ -76,19 +75,27 @@ function doWeb(doc, url) {
 	else if(detectWeb(doc, url) == "newspaperArticle" || detectWeb(doc, url) == "magazineArticle" ){//newspaperArticle or CainXin Weekly magazine
 		scrape(doc, url);
 	}
+	else if (detectWeb(doc, url) == "blogPost")
+	{
+		//TO DO
+		return;
+	}
 }
 
 function scrape(doc, url) {
-	var item = new Zotero.Item("newspaperArticle");
+	var type = detectWeb(doc, url);
+	//Z.debug(type);
+	var item = new Zotero.Item(type);
+	var user = null;
 	
 	var tt = ZU.xpathText(doc, '//meta[@property="og:title"]/@content')
 			 || ZU.xpathText(doc, '//div[@id="the_content"]/div[@id="conTit"]/h1').trim();
-	Z.debug(tt);
+	//Z.debug(tt);
 	item.title=tt;
 	//var authors=ZU.xpathText(doc, '//meta[@name="author"]/@content');
 	var authors=doc.getElementById('author_baidu').innerText;
 	authors=authors.replace("作者：", "").split(/[，、\s]+/);
-	Z.debug(authors);
+	//Z.debug(authors);
 	if(authors.length > 1){
 		for( i=0; i < authors.length; i=i+1){
 			item.creators.push(ZU.cleanAuthor((authors[i]), "author"));			
@@ -98,23 +105,30 @@ function scrape(doc, url) {
 	{
 		item.creators.push(ZU.cleanAuthor((authors[0]), "author"));
 	}
-	Z.debug(item.creators);
+	//Z.debug(item.creators);
 	
 	item.language='zh-hans';
-	item.url=url;
+	item.url= ZU.xpathText(doc, '//meta[@property="og:url"]/@content') || url;
 	
 	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content') 
 						|| ZU.xpathText(doc, '//meta[@name="description"]/@content');
-	Z.debug(item.abstractNote);
-	item.publicationTitle = "财新 Caixin";
-	//item.CN = "44-0003";	
+	//Z.debug(item.abstractNote);
 	
+	if(type === "magazineArticle"){
+		item.publicationTitle = "财新周刊";	
+		item.ISSN = "2096-1251";
+		item.CN = "10-1344/F";
+	}
+	else if (type === "newspaperArticle"){
+		item.publicationTitle = "财新 Caixin";	
+	}
+
 	var publicationDate = ZU.xpathText(doc, "(//div[@class='bd_block'])/span[@id='pubtime_baidu']");
 	//var publicationDate=doc.body.getElementsByClassName('nfzm-content__publish')[0].getAttribute('data-time');
 	if (publicationDate) {
 		item.date = ZU.strToISO(publicationDate);
 	}
-	Z.debug(publicationDate);
+	//Z.debug(publicationDate);
 	//item.accessDate = new Date().toISOString().slice(0, 10); // Zotero will retrieve automatically	
 	
 	item.attachments.push({
