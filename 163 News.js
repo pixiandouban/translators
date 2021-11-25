@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-24 16:22:21"
+	"lastUpdated": "2021-11-24 16:44:29"
 }
 
 /*
@@ -97,6 +97,7 @@ function scrape(doc, url) {
 	Z.debug("abstractNote: " +item.abstractNote);
 	
 	item.type = "blogPost";
+	item.websiteType= '163 News';	
 
 	var publicationDate = ZU.xpathText(doc, '//meta[@property="article:published_time"]/@content');
 	if (publicationDate) {
