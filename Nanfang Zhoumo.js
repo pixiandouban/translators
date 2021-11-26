@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-22 06:25:58"
+	"lastUpdated": "2021-11-26 11:42:41"
 }
 
 // Made by pixiandouban; unfinished
@@ -39,7 +39,7 @@
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	if(url.includes('term_id=')){
+	if(url.includes('term_id=') || url.includes('k=')){
 		return "multiple";
 	}
 	else
@@ -105,6 +105,15 @@ function scrape(doc, url) {
 	}
 	
 	//item.accessDate = new Date().toISOString().slice(0, 10);
+	
+	keywords = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+	//Z.debug(keywords);
+	var tags = keywords.split(',');
+	//Z.debug(tags);
+	for(let i = 0; i < tags.length; i++){
+		item.tags[i] = tags[i];
+	}
+	//Z.debug(item.tags);
 
 	item.attachments.push({
 		title: "Snapshot",
@@ -135,3 +144,29 @@ function scrape(doc, url) {
 	});
 	*/
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.infzm.com/search?k=%E7%96%AB%E6%83%85&from=keywords",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.infzm.com/contents?term_id=120&form_content_id=217729",
+		"items": "multiple"
+	},	
+	{
+		"type": "web",
+		"url": "https://www.infzm.com/contents/217729",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"language": "zh-hans",
+				"title": "五十年后回看芬利的《古代经济》",
+				"date": "2021-11-14"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
