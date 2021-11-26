@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-25 11:34:23"
+	"lastUpdated": "2021-11-26 04:18:17"
 }
 
 /*
@@ -107,7 +107,7 @@ function scrape(doc, url) {
 	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	Z.debug(item.abstractNote);
 	item.publicationTitle = "联合早报";
-	//item.CN = "44-0003";
+	//item.ISSN = "44-0003";
 
 	var pubDate = doc.body.querySelector("div.col-12.col-xl.article-byline > h4.title-byline.date-published");
 	var publicationDate = pubDate.innerText.replace("发布 / ", "")
@@ -117,7 +117,12 @@ function scrape(doc, url) {
 		item.date = ZU.strToISO(publicationDate);
 	}
 	
-	item.tags = [];
+	var keywords = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+	var tags = keywords.split(/, /);
+	for(let i = 0; i < tags.length; i++){
+		item.tags[i] = tags[i];
+	}
+	Z.debug(item.tags);
 	
 	//item.accessDate = new Date().toISOString().slice(0, 10);
 
