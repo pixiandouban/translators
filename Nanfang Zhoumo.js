@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-28 03:10:35"
+	"lastUpdated": "2021-11-28 03:38:37"
 }
 
 // Made by pixiandouban; unfinished
@@ -104,7 +104,7 @@ function scrape(doc, url) {
 	item.creators.push(ZU.cleanAuthor((authors), "author"));
 	item.language='zh-hans';
 	item.url=url;
-	item.abstract = ZU.xpathText(doc, '//meta[@name="description"]/@content');
+	item.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
 	item.publicationTitle = "南方周末";
 	item.CN = "44-0003";
 
