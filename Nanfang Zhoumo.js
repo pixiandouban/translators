@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-28 03:38:37"
+	"lastUpdated": "2021-11-28 03:58:42"
 }
 
 // Made by pixiandouban; unfinished
@@ -53,7 +53,9 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// TODO: adjust the CSS selector
-	var rows = doc.querySelectorAll('ul[class="nfzm-list ui-line"]>li>a') || doc.querySelectorAll('ul[class="nfzm-list ui-line ui-rich"]>li>a') ;
+	//var rows = doc.querySelectorAll('ul[class="nfzm-list ui-line"]>li>a') || doc.querySelectorAll('ul[class="nfzm-list ui-line ui-rich"]>li>a') ;
+	var rows = doc.querySelectorAll('ul[class="nfzm-list ui-line"]>li>a, ul[class="nfzm-list ui-line ui-rich"]>li>a');
+	Z.debug(rows);
 	for (let row of rows) {
 		// TODO: check and maybe adjust
 		let href = row.href;
@@ -101,7 +103,17 @@ function scrape(doc, url) {
 	//item.title = ZU.xpathText(doc, '//head/title');
 	item.title = ZU.xpathText(doc, '//div[@class="nfzm-content__title"]/h1');
 	var authors=ZU.xpathText(doc, '//meta[@name="author"]/@content');
-	item.creators.push(ZU.cleanAuthor((authors), "author"));
+	authors = authors.split(/[\s]+/);
+	if(authors.length > 1){
+		for( i=0; i < authors.length; i=i+1){
+			item.creators.push(ZU.cleanAuthor((authors[i]), "author"));			
+		}
+	}
+	else if(authors.length === 1)
+	{
+		item.creators.push(ZU.cleanAuthor((authors[0]), "author"));
+	}	
+	//item.creators.push(ZU.cleanAuthor((authors), "author"));
 	item.language='zh-hans';
 	item.url=url;
 	item.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
