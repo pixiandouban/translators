@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-26 11:42:41"
+	"lastUpdated": "2021-11-28 03:10:35"
 }
 
 // Made by pixiandouban; unfinished
@@ -48,17 +48,19 @@ function detectWeb(doc, url) {
 	}
 }
 
-/*
+
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// TODO: adjust the CSS selector
-	var rows = doc.querySelectorAll('h2>a.title[href*="/article/"]');
+	var rows = doc.querySelectorAll('ul[class="nfzm-list ui-line"]>li>a') || doc.querySelectorAll('ul[class="nfzm-list ui-line ui-rich"]>li>a') ;
 	for (let row of rows) {
 		// TODO: check and maybe adjust
 		let href = row.href;
+		Z.debug("href: "+href);
 		// TODO: check and maybe adjust
-		let title = ZU.trimInternal(row.textContent);
+		let title = ZU.xpathText(row, './/div/div/div/header/h5').trim();
+		Z.debug("title: "+title);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -66,13 +68,20 @@ function getSearchResults(doc, checkOnly) {
 	}
 	return found ? items : false;
 }
-*/
+
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		//Zotero.selectItems(getSearchResults(doc, false), function (items) {
-		//	if (items) ZU.processDocuments(Object.keys(items), scrape);
-		//});
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
 	}
 	else {//newspaperArticle
 		scrape(doc, url);
@@ -80,6 +89,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
+
 	var item = new Zotero.Item("newspaperArticle");
 
 	const ogMetadataCache = new Map();
@@ -155,7 +165,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.infzm.com/contents?term_id=120&form_content_id=217729",
 		"items": "multiple"
-	},	
+	},
 	{
 		"type": "web",
 		"url": "https://www.infzm.com/contents/217729",
