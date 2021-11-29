@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2021-10-13 13:48:24"
+	"lastUpdated": "2021-11-29 05:21:21"
 }
 
 /*
@@ -371,6 +371,7 @@ function getAttachments(pdfurl, cajurl, keepPDF) {
 	}
 	return attachments;
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -684,6 +685,55 @@ var testCases = [
 						"tag": "阿尔茨海默病"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://t.cnki.net/kcms/detail?v=zDWWPGpj7XNpsTs-o3JLr84PtQjgpctkZYiLh9qBO_IhTszSbi1ErV3psbkKvb9hbSJBUC0pBkrQJAJJwu4R7cFkyYtZqZmExrt7rXsnApe64Bg41iHYqw==&uniplatform=NZKPT",
+		"items":[
+			{
+				"itemType": "journalArticle",
+				"title": "星体的Bonnesen-型不等式",
+				"creators": [
+					{
+						"lastName": "张",
+						"firstName": "增乐",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"ISSN": "1003-3998",
+				"abstractNote": "受Lutwak与Petty工作[25-26,37]的启发,该文构造了关于给定凸体K的一类新型星体gK,建立了关于gK的等周不等式,并由此给出关于凸体K的逆Bonnesen-型等周不等式.",
+				"extra": "<北大核心>","<CSCD>"
+				"issue": "05",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"publicationTitle": "数学物理学报",
+				"url": "https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CJFD&filename=SXWX202105001",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "等周不等式"
+					},
+					{
+						"tag": "Bonnesen-型等周不等式"
+					},
+					{
+						"tag": "微分仿射等周不等式"
+					},
+					{
+						"tag": "星体"
+					}
+				],
+				"volume": "41",
 				"notes": [],
 				"seeAlso": []
 			}
