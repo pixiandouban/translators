@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2021-11-29 05:21:21"
+	"lastUpdated": "2021-11-29 18:17:37"
 }
 
 /*
@@ -707,7 +707,7 @@ var testCases = [
 				"date": "2021",
 				"ISSN": "1003-3998",
 				"abstractNote": "受Lutwak与Petty工作[25-26,37]的启发,该文构造了关于给定凸体K的一类新型星体gK,建立了关于gK的等周不等式,并由此给出关于凸体K的逆Bonnesen-型等周不等式.",
-				"extra": "<北大核心>","<CSCD>"
+				"extra": "<北大核心>","<CSCD>",
 				"issue": "05",
 				"language": "中文;",
 				"libraryCatalog": "CNKI",
