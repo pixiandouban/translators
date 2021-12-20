@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-20 07:41:56"
+	"lastUpdated": "2021-12-20 08:44:48"
 }
 
 /*
@@ -854,6 +854,40 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	}
+	},
+	{
+		"type": "web",
+		"url": "https://cn.nytimes.com/science/20211214/earth-black-box-climate-change/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "“地球黑匣子”：记录人类文明崩溃之日",
+				"creators": [
+					{
+						"firstName": "Livia",
+						"lastName": "Albeck-Ripka",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-12-14",
+				"ISSN": "0362-4331",
+				"abstractNote": "“地球黑匣子”是一个钢制保险库，将建在澳大利亚。设计者表示，一旦人类被气候变化摧毁，它将为未来研究提供相关信息，设计初衷是“让我们的领导人担起责任来”。",
+				"language": "zh-cmn-hans",
+				"libraryCatalog": "NYTimes.com",
+				"publicationTitle": "The New York Times",
+				"section": "Archives",
+				"url": "https://cn.nytimes.com/science/20211214/earth-black-box-climate-change/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},	
 ]
 /** END TEST CASES **/
