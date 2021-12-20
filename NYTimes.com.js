@@ -2,14 +2,14 @@
 	"translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
 	"label": "NYTimes.com",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(query\\.nytimes\\.com/(search|gst)/|(select\\.|www\\.|mobile\\.|[^\\/.]*\\.blogs\\.)?nytimes\\.com/)",
+	"target": "^https?://(query\\.nytimes\\.com/(search|gst)/|(select\\.|cn\\.|www\\.|mobile\\.|[^\\/.]*\\.blogs\\.)?nytimes\\.com/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-22 19:34:13"
+	"lastUpdated": "2021-12-20 07:41:56"
 }
 
 /*
@@ -202,6 +202,7 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
