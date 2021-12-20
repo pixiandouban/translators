@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-20 08:44:48"
+	"lastUpdated": "2021-12-20 08:53:54"
 }
 
 /*
@@ -875,7 +875,6 @@ var testCases = [
 				"language": "zh-cmn-hans",
 				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
-				"section": "Archives",
 				"url": "https://cn.nytimes.com/science/20211214/earth-black-box-climate-change/",
 				"attachments": [
 					{
@@ -888,6 +887,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},	
+	}
 ]
 /** END TEST CASES **/
