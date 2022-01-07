@@ -2,14 +2,14 @@
 	"translatorID": "02565b25-1f26-4edd-89ac-f2cdf46ea5fe",
 	"label": "Xinhua New Agency (news.cn zh)",
 	"creator": "pixiandouban",
-	"target": "^https?://www.news.cn",
+	"target": "^https?:\\/\\/[a-z]+\\.news\\.cn",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-22 15:20:09"
+	"lastUpdated": "2022-01-07 07:05:44"
 }
 
 /*
@@ -82,14 +82,15 @@ function scrape(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
 
 	//item.title = ZU.xpathText(doc, '//head/title');
-	item.title = ZU.xpathText(doc, '//div[@class="head-line clearfix"]/h1/span[@class="title"]');
-	Z.debug(item.title);
+	item.title = ZU.xpathText(doc, '//div[@class="head-line clearfix"]/h1/span[@class="title"]') || ZU.xpathText(doc, '//div[@id="article"]/h1[@id="title"]');
+	//item.title = ZU.xpathText(doc, '//div[@id="article"]/h1[@id="title"]');	
+	Z.debug("title: "+item.title);
 	//var authors=ZU.xpathText(doc, '//meta[@name="author"]/@content');
 	//item.creators.push(ZU.cleanAuthor((authors), "author"));
 	item.language='zh-hans';
 	item.url=url;
 	item.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
-	Z.debug(item.abstractNote);
+	Z.debug("abstractNote: "+item.abstractNote);
 	item.publicationTitle = "新华社";
 	//item.CN = "44-0003";
 
@@ -101,9 +102,14 @@ function scrape(doc, url) {
 	//var publicationDate = ZU.xpathText(doc, '//div[@class="header-time left"]/span[@class="year"]/em') +'/' +ZU.xpathText(doc, '//div[@class="header-time left"]/span[@class="day"]') ;
 	//var publicationDate = ZU.xpathText(doc, '//meta[@itemprop="datePublished"]/@content')
 	//var publicationDate=doc.body.getElementsByClassName('nfzm-content__publish')[0].getAttribute('data-time');
-	Z.debug(publicationDate);
-	if (publicationDate) {
-		item.date = ZU.strToISO(publicationDate);
+	Z.debug("publicationDate: " + publicationDate);
+	if (publicationYear) {
+		item.date = ZU.strToISO(publicationDate); //www.news.cn
+		Z.debug("item.date : " + item.date);		
+	}
+	else{
+		item.date = ZU.strToISO(ZU.xpathText(doc, '//div[@class="source"]/span[@class="time"]')); //local provinces channel
+		Z.debug("item.date : " + item.date);		
 	}
 
 	//item.tags = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
