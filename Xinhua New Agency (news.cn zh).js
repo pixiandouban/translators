@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-07 07:05:44"
+	"lastUpdated": "2022-01-07 11:27:43"
 }
 
 /*
@@ -82,7 +82,9 @@ function scrape(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
 
 	//item.title = ZU.xpathText(doc, '//head/title');
-	item.title = ZU.xpathText(doc, '//div[@class="head-line clearfix"]/h1/span[@class="title"]') || ZU.xpathText(doc, '//div[@id="article"]/h1[@id="title"]');
+	item.title = ZU.xpathText(doc, '//div[@class="head-line clearfix"]/h1/span[@class="title"]') 
+	|| ZU.xpathText(doc, '//div[@id="article"]/h1[@id="title"]')
+	|| ZU.xpathText(doc, '//div[@class="h-news"]/div[@class="h-title"]');
 	//item.title = ZU.xpathText(doc, '//div[@id="article"]/h1[@id="title"]');	
 	Z.debug("title: "+item.title);
 	//var authors=ZU.xpathText(doc, '//meta[@name="author"]/@content');
@@ -91,7 +93,6 @@ function scrape(doc, url) {
 	item.url=url;
 	item.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
 	Z.debug("abstractNote: "+item.abstractNote);
-	item.publicationTitle = "新华社";
 	//item.CN = "44-0003";
 
 
@@ -108,10 +109,23 @@ function scrape(doc, url) {
 		Z.debug("item.date : " + item.date);		
 	}
 	else{
-		item.date = ZU.strToISO(ZU.xpathText(doc, '//div[@class="source"]/span[@class="time"]')); //local provinces channel
+		item.date = ZU.strToISO(ZU.xpathText(doc, '//div[@class="source"]/span[@class="time"]')); //local channel; js|ah|sh....news.cn
 		Z.debug("item.date : " + item.date);		
 	}
 
+	var authors;
+	var source = ZU.xpathText(doc, '//meta[@name="source"]/@content') //Xinhua News Agency
+			  || ZU.xpathText(doc, '//div[@class="source"]/span/em[@id="source"]') //reprinted news from other agency
+			  || ZU.xpathText(doc, '//div[@class="h-p3 clearfix"]/div[@class="source"]').trim().replace(/来源：/,""); //reprinted news from other agency
+	//var source = ZU.xpathText(doc, '//div[@class="source"]/span/em[@id="source"]');
+	//var source = ZU.xpathText(doc, '//div[@class="h-p3 clearfix"]/div[@class="source"]');//.trim().replace(/来源：/,""); //reprinted news from other agency	
+	Z.debug("source: "+ source);
+	if(source){
+		item.publicationTitle = source;		
+	}
+	else{
+	item.publicationTitle = "新华网";				
+	}
 	//item.tags = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
 
 	//item.accessDate = new Date().toISOString().slice(0, 10);
