@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-26 04:18:17"
+	"lastUpdated": "2022-01-08 10:58:41"
 }
 
 /*
@@ -42,9 +42,10 @@ function detectWeb(doc, url) {
 	if(url.includes('search')){
 		return "multiple";
 	}	
-	else if(ogType && ogType.content === "NewsArticle")
+	else if(ogType)
 	{
-		return "newspaperArticle";
+		if (ogType.content === "NewsArticle" || ogType.content === "article")
+			return "newspaperArticle";
 	}
 	else{
 		return false;
@@ -105,24 +106,31 @@ function scrape(doc, url) {
 	item.language='zh-hans';
 	item.url= ZU.xpathText(doc, '//meta[@property="og:url"]/@content') || url;
 	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
-	Z.debug(item.abstractNote);
+	Z.debug("abstractNote: " + item.abstractNote);
 	item.publicationTitle = "联合早报";
 	//item.ISSN = "44-0003";
 
 	var pubDate = doc.body.querySelector("div.col-12.col-xl.article-byline > h4.title-byline.date-published");
-	var publicationDate = pubDate.innerText.replace("发布 / ", "")
-	//Z.debug(pubDate);
-	Z.debug(publicationDate);
+	var publicationDate ;
+	if(pubDate)
+	{
+		publicationDate = pubDate.innerText.replace("发布 / ", "") ; //zaobao.com.sg
+	}
+	else{
+		 publicationDate = ZU.xpathText(doc, '//div[@class="text-track-v1 author-info f14"]/div[@class="mgt10"]/span'); // zaobao.com
+	}
+	
+	Z.debug("publicationDate: " + publicationDate);
 	if (publicationDate) {
 		item.date = ZU.strToISO(publicationDate);
 	}
 	
 	var keywords = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
-	var tags = keywords.split(/, /);
+	var tags = keywords.trim().split(/,/);
 	for(let i = 0; i < tags.length; i++){
 		item.tags[i] = tags[i];
 	}
-	Z.debug(item.tags);
+	Z.debug("tags: " + item.tags);
 	
 	//item.accessDate = new Date().toISOString().slice(0, 10);
 
@@ -178,6 +186,18 @@ var testCases = [
 				"date": "2021-11-22"
 			}
 		]
-	}
+	},
+	{
+		"type": "web",
+		"url": "https://www.zaobao.com/realtime/singapore/story20220107-1230664",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"language": "zh-hans",
+				"title": "巴顺芭路六家花圃业者土地租约可延长五个月 ",
+				"date": "2022-01-07"
+			}
+		]
+	}	
 ]
 /** END TEST CASES **/
