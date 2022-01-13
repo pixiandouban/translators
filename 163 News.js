@@ -2,14 +2,14 @@
 	"translatorID": "fb5447d7-78e1-4c54-9afd-b076c1f8ebc0",
 	"label": "163 News",
 	"creator": "pixiandouban",
-	"target": "^https?://www.163.com/news",
+	"target": "^https?://www.163.com/(news|money|tech|ent)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-24 16:44:29"
+	"lastUpdated": "2022-01-13 19:57:14"
 }
 
 /*
@@ -83,21 +83,49 @@ function scrape(doc, url) {
 	
 	var item = new Zotero.Item("blogPost");		
 	var user = doc.body.querySelector("div.container.clearfix > div.post_main > div.post_info > a");
+	var jubao = "举报";
 	Z.debug("user: " + user.innerText);
-	item.blogTitle = user.innerText;
+	if(user.innerText !== jubao ){
+		item.blogTitle = user.innerText;	
+	}
+	else{
+		source = doc.body.querySelector("div.container.clearfix > div.post_main > div.post_info");
+		sourceintext = source.innerText.match(/来源:.*/);
+		sourceTitle = sourceintext.toString().replace("来源:", "");
+		Z.debug("sourceTitle: " + sourceTitle);
+		//Z.debug("source: "+ source.innerText);
+		item.blogTitle = sourceTitle;			
+	}
 
+	//item.url=ZU.xpathText(doc, '//meta[@property="og:url"]/@content');
+	if( user.innerText !== jubao){
+		item.url=ZU.xpathText(doc, '//div[@class="post_info"]/a[1]/@href'); //original agency website		
+	}
+	else{
+		item.url = ZU.xpathText(doc, '//meta[@property="og:url"]/@content'); //163 website	
+	} 
+	//item.url = doc.body.querySelector("div.post_info > a.href");
+	Z.debug("url: " + item.url);	
 	
-	var tt = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
-	Z.debug("Title: "+tt);
-	item.title=tt;
+	var articleTitle = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
+	Z.debug("Title: "+articleTitle);
+	item.title=articleTitle;
+
+	var keywords = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+	var tags = keywords.split(/,/);
+	for(let i = 0; i < tags.length; i++){
+		item.tags[i] = tags[i];
+	}
+	Z.debug("tags: " + item.tags);
 
 	item.language='zh-CN';
-	item.url=ZU.xpathText(doc, '//meta[@property="og:url"]/@content');
+	
 	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	Z.debug("abstractNote: " +item.abstractNote);
 	
 	item.type = "blogPost";
-	item.websiteType= '163 News';	
+	item.websiteType= '网易新闻';	
+
 
 	var publicationDate = ZU.xpathText(doc, '//meta[@property="article:published_time"]/@content');
 	if (publicationDate) {
@@ -106,8 +134,6 @@ function scrape(doc, url) {
 	}
 	
 	//item.accessDate = new Date().toISOString().slice(0, 10);
-	
-	item.tags=[];
 	
 	item.attachments.push({
 		title: "Snapshot",
@@ -152,6 +178,30 @@ var testCases = [
 				"date": "2021-11-23"
 			}
 		]
-	}
+	},
+	{
+		"type": "web",
+		"url": "https://www.163.com/tech/article/GTKJ44M1000999LD.html",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"language": "zh-CN",
+				"title": "华为、李洪元事件民事判决书曝光：后者自愿离职，法院驳回其要求",
+				"date": "2022-01-13"
+			}
+		]
+	},	
+	{
+		"type": "web",
+		"url": "https://www.163.com/ent/article/GTIUCSD100038FO9.html",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"language": "zh-CN",
+				"title": "《白雪公主》电影男主角选定 身份不是王子或猎人",
+				"date": "2022-01-13"
+			}
+		]
+	},		
 ]
 /** END TEST CASES **/
