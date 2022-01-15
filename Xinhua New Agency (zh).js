@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-15 06:20:56"
+	"lastUpdated": "2022-01-15 08:46:53"
 }
 
 /*
@@ -84,7 +84,8 @@ function scrape(doc, url) {
 	//item.title = ZU.xpathText(doc, '//head/title');
 	item.title = ZU.xpathText(doc, '//div[@class="head-line clearfix"]/h1/span[@class="title"]') 
 	|| ZU.xpathText(doc, '//div[@id="article"]/h1[@id="title"]')
-	|| ZU.xpathText(doc, '//div[@class="h-news"]/div[@class="h-title"]');
+	|| ZU.xpathText(doc, '//div[@class="h-news"]/div[@class="h-title"]')
+	|| ZU.xpathText(doc, '//div[@id="headerTitle"]/div[@id="articleTit"]/h1[@id="title"]');
 	//item.title = ZU.xpathText(doc, '//div[@id="article"]/h1[@id="title"]');	
 	Z.debug("title: "+item.title);
 	//var authors=ZU.xpathText(doc, '//meta[@name="author"]/@content');
@@ -111,9 +112,9 @@ function scrape(doc, url) {
 	//var publicationDate = ZU.xpathText(doc, '//div[@class="header-time left"]/span[@class="year"]/em') +'/' +ZU.xpathText(doc, '//div[@class="header-time left"]/span[@class="day"]') ;
 	//var publicationDate = ZU.xpathText(doc, '//meta[@itemprop="datePublished"]/@content')
 	//var publicationDate=doc.body.getElementsByClassName('nfzm-content__publish')[0].getAttribute('data-time');
-	Z.debug("publicationDate: " + publicationDate);
+	//Z.debug("publicationDate: " + publicationDate);
 	if (publicationYear) {
-		item.date = ZU.strToISO(publicationDate); //www.news.cn
+		item.date = ZU.strToISO(publicationDate); //www.news.cn|www.xinhuanet.com
 		Z.debug("item.date : " + item.date);		
 	}
 	else{
@@ -124,7 +125,10 @@ function scrape(doc, url) {
 	var authors;
 	var source = ZU.xpathText(doc, '//meta[@name="source"]/@content') //Xinhua News Agency
 			  || ZU.xpathText(doc, '//div[@class="source"]/span/em[@id="source"]') //reprinted news from other agency
+			  || ZU.xpathText(doc, '//div[@id="news_title"]/div[@class="source"]/span[@class="sourceText"]') //xx.xinhuanet.com			  			  
+			  || ZU.xpathText(doc, '//div[@class="header-cont clearfix"]/div[@class="source"]').replace(/来源：/,"")			  
 			  || ZU.xpathText(doc, '//div[@class="h-p3 clearfix"]/div[@class="source"]').trim().replace(/来源：/,""); //reprinted news from other agency
+
 	//var source = ZU.xpathText(doc, '//div[@class="source"]/span/em[@id="source"]');
 	//var source = ZU.xpathText(doc, '//div[@class="h-p3 clearfix"]/div[@class="source"]');//.trim().replace(/来源：/,""); //reprinted news from other agency	
 	Z.debug("source: "+ source);
@@ -220,5 +224,25 @@ var testCases = [
 				]
 			}
 		]
-	}
+	},
+	{
+		"type": "web",
+		"url": "http://www.xinhuanet.com/tech/20220113/b35605fa7825417b88f1c970e9c8a74b/c.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "市场主体创新活力得到激发",
+				"date": "2021-11-22",				
+				"language": "zh-hans",
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				]
+			}
+		]
+	},	
 ]
