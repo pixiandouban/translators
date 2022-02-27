@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-25 06:55:06"
+	"lastUpdated": "2022-02-27 04:28:40"
 }
 
 /*
@@ -112,7 +112,7 @@ function scrape(doc, url) {
 		}
 
 		item.publicationTitle = "South China Morning Post";
-		item.ISSN = "1072-6731";
+		item.ISSN = "1021-6731";
 		
 		// Multiple authors are (sometimes) just put into the same Metadata field
 		var authors = attr(doc, 'meta[name="cse_author"]', 'content') || attr(doc, 'meta[name="author"]', 'content') || attr(doc, 'meta[name="byl"]', 'content') || text(doc, '*[class^="Byline-bylineAuthor--"]');
