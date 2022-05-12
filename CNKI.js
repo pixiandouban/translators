@@ -2,14 +2,14 @@
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
 	"creator": "Aurimas Vinckevicius, Xingzhong Lin",
-	"target": "https?://.*?/(kns8?/defaultresult/index|kns8?/AdvSearch|kcms/detail|KXReader/Detail\\?|KNavi/|Kreader/CatalogViewPage\\.aspx\\?|kcms/doi)",
+	"target": "https?://.*?/(kns8?/defaultresult/index|kns8?/AdvSearch|kcms/detail|KXReader/Detail\\?|KNavi/|Kreader/CatalogViewPage\\.aspx\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2021-11-29 19:12:11"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-04-13 13:25:16"
 }
 
 /*
@@ -52,7 +52,8 @@ function getRefWorksByID(ids, onDataAvailable) {
 				.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation')
 				.replace(/;;/g, ';') // 保留作者中一个英文分号
 				.replace(/^ AB/g, 'AB') // 去除AB前空格
-				.replace(/vo (\d+)\n/, "VO $1\n")  // 修改vo 大小写
+				.replace(/vo 0?(\d+)\n/, "VO $1\n")  // Change vo to VO, remove leading 0
+				.replace(/IS 0?(\d+)\n/, "IS $1\n")  // Remove leading 0
 				.replace(
 					/^(A[1-4]|U2)\s*([^\r\n]+)/gm,
 					function (m, tag, authors) {
@@ -105,9 +106,9 @@ function getIDFromHeader(doc, url) {
 }
 
 function getIDFromPage(doc, url) {
-	return getIDFromURL(url)
-		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'))
-		|| getIDFromHeader(doc, url);
+	return getIDFromHeader(doc, url)
+		|| getIDFromURL(url)
+		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'));
 }
 
 function getTypeFromDBName(id) {
@@ -214,7 +215,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	Z.debug("----------------CNKI 20210909---------------------");
+	Z.debug("----------------CNKI 20220402---------------------");
 	if (detectWeb(doc, url) == "multiple") {
 		var itemInfo = {};
 		var items = getItemsFromSearchResults(doc, url, itemInfo);
@@ -280,6 +281,7 @@ function scrape(ids, doc, itemInfo) {
 					newItem.abstractNote = ZU.xpath(doc, "//span[@id='ChDivSummary']")[0].innerText;
 				}
 			}
+			newItem.attachments[0].referer = url;
 			var timestamp = new Date().toLocaleDateString().replace(/\//g, '-');
 			var citeStr = cite ? `${cite} citations(CNKI)[${timestamp}]` : "";
 			newItem.extra = (citeStr + pubTypeStr).trim();
@@ -314,6 +316,7 @@ function scrape(ids, doc, itemInfo) {
 				newItem.tags[j] = newItem.tags[j].replace(/:\d+$/, '');
 			}
 			newItem.url = url;
+			newItem.language = 'zh_CN';
 
 			if (newItem.abstractNote) {
 				newItem.abstractNote = newItem.abstractNote.replace(/\s*[\r\n]\s*/g, '\n')
@@ -323,7 +326,6 @@ function scrape(ids, doc, itemInfo) {
 			// CN 中国刊物编号，非refworks中的callNumber
 			// CN in CNKI refworks format explains Chinese version of ISSN
 			newItem.callNumber = null;
-			Z.debug(newItem.attachments[0].url);
 			newItem.complete();
 		});
 
@@ -354,9 +356,14 @@ function getCAJ(doc, itemType) {
 // add pdf or caj to attachments, default is pdf
 function getAttachments(pdfurl, cajurl, keepPDF) {
 	var attachments = [];
-	if (keepPDF && cajurl) {
-		var url = pdfurl ? pdfurl : cajurl.includes("&dflag=nhdown") ? cajurl.replace('&dflag=nhdown', '&dflag=pdfdown') : cajurl + '&dflag=pdfdown';
-		url = url.replace(/kns\.cnki\.net\/KNS8/, "oversea.cnki.net/kns");
+	if (keepPDF && pdfurl) {
+		attachments.push({
+			title: "Full Text PDF",
+			mimeType: "application/pdf",
+			url: pdfurl
+		});
+	} else if (keepPDF && !cajurl.includes("bar.cnki.net")) {  //Can not download PDF when contains bar.cnki.net
+		var url = cajurl.includes("&dflag=nhdown") ? cajurl.replace('&dflag=nhdown', '&dflag=pdfdown') : cajurl + '&dflag=pdfdown';
 		attachments.push({
 			title: "Full Text PDF",
 			mimeType: "application/pdf",
@@ -366,13 +373,11 @@ function getAttachments(pdfurl, cajurl, keepPDF) {
 		attachments.push({
 			title: "Full Text CAJ",
 			mimeType: "application/caj",
-			url: cajurl.replace(/kns\.cnki\.net\/KNS8/, "oversea.cnki.net/kns")
+			url: cajurl
 		});
 	}
 	return attachments;
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -685,55 +690,6 @@ var testCases = [
 						"tag": "阿尔茨海默病"
 					}
 				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://t.cnki.net/kcms/detail?v=zDWWPGpj7XNpsTs-o3JLr84PtQjgpctkZYiLh9qBO_IhTszSbi1ErV3psbkKvb9hbSJBUC0pBkrQJAJJwu4R7cFkyYtZqZmExrt7rXsnApe64Bg41iHYqw==&uniplatform=NZKPT",
-		"items":[
-			{
-				"itemType": "journalArticle",
-				"title": "星体的Bonnesen-型不等式",
-				"creators": [
-					{
-						"lastName": "张",
-						"firstName": "增乐",
-						"creatorType": "author"
-					}
-				],
-				"date": "2021",
-				"ISSN": "1003-3998",
-				"abstractNote": "受Lutwak与Petty工作[25-26,37]的启发,该文构造了关于给定凸体K的一类新型星体gK,建立了关于gK的等周不等式,并由此给出关于凸体K的逆Bonnesen-型等周不等式.",
-				"extra": "<北大核心>",
-				"issue": "05",
-				"language": "中文;",
-				"libraryCatalog": "CNKI",
-				"publicationTitle": "数学物理学报",
-				"url": "https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CJFD&filename=SXWX202105001",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "等周不等式"
-					},
-					{
-						"tag": "Bonnesen-型等周不等式"
-					},
-					{
-						"tag": "微分仿射等周不等式"
-					},
-					{
-						"tag": "星体"
-					}
-				],
-				"volume": "41",
 				"notes": [],
 				"seeAlso": []
 			}

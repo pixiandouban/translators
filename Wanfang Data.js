@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2021-07-18 12:07:54"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-04-15 08:47:09"
 }
 
 /*
@@ -108,124 +108,141 @@ var typeFieldMapper = {
 };
 
 
-function getRefworksByID(ids, next) {
-	if (!ids.length) return;
-	var { dbname, filename, url} = ids.shift();
-	var headers = {
-		'Content-Type': 'application/json;charset=UTF-8'
-	};
-	var postData = JSON.stringify({'Id':filename});
-	Z.debug(dbname, filename, url);
-	var searchType = {
-		journalArticle: "Periodical",
-		thesis: "Thesis",
-		conferencePaper: "Conference",
-		patent: "Patent"
-	};
-	var postUrl = "https://d.wanfangdata.com.cn/Detail/" + searchType[dbname] + "/";
-	ZU.doPost(postUrl, postData, 
-		function(text) {
-			detail = JSON.parse(text).detail[0];
-			detail = detail[Object.keys(detail)[0]];
-			// Z.debug(detail);
-			detail.url = url;
-			detail.dbname = dbname;
-			next(detail);
-			if (ids.length) {
-				getRefworksByID(ids, next);
-			}
-		},
-		headers=headers
-	);
-	
+var nodeFieldMapper = {
+	doi: "DOI",
+	Keyword: addTags,
+	"作者": addCreators,
+	"刊名": "publicationTitle",
+	Journal: "journalAbbreviation",
+	"年，卷(期)": addDVI,
+	"页码": "pages",
+	"作者单位": "extra",
+	"基金项目": "extra",
+	"在线出版日期": "extra",
+	"学位年度": "date",
+	"学位授予单位": "university",
+	"授予学位": "thesisType",
+	"导师姓名": addCreators,
+	"会议地点": "place",
+	"会议名称": "conferenceName",
+	"母体文献": "series",
+	"会议时间": "date",
+	"国别省市代码": "country",
+	"主申请人地址": "place",
+	"发布时间": "extra",
+	"期刊": addMDVI,
+	"申请/专利号": "patentNumber",
+	"公开/公告号": "applicationNumber",
+	"申请/专利权人": "issuingAuthority",
+	"发明/设计人": addCreators,
+	"代理人": addCreators,
+};
+
+function addField(newItem, field, value) {
+	value = value.replace(/\s+/, " ");
+	newItem[field] ? newItem[field] = newItem[field] + '\n' + value : newItem[field] = value;
+}
+
+function getTextPair(node) {
+	return node.textContent.split(/：\s?/).map(e => e.trim());
 }
 
 
-function scrape(ids, itemInfo) {
-	Z.debug("---------------WanFang Data 20210401---------------");
-	getRefworksByID(ids, function(detail) {
-		// Z.debug(detail);
-		var dbname = detail.dbname;
-		var newItem = new Zotero.Item();
-		var matcher = typeFieldMapper[dbname];
-		newItem.itemType = dbname;
-		newItem.title = detail.Title[0];
-		newItem.abstractNote = detail.Abstract[0];
-		detail.Language && detail.Language != 'chi' ? newItem.language=detail.Language : newItem.language = 'zh_CN';
-		if (detail.FulltextPath && detail.FulltextPath.startsWith("http")) { // add full text path in note
-			var note = `文章全文链接<br><a href="${detail.FulltextPath}">${detail.FulltextPath}</a>`;
-			newItem.notes.push({note:note});
-		}
-		newItem.url = detail.url;
-		for (let k in matcher) {
-			var field = matcher[k];
-			if (k === "Creator") {
-				newItem.creators = addCreators(field, detail);
-				continue;
-			}
-			if (field === "tags") {
-				var tags = [];
-				detail[k].forEach(tag => newItem.tags.push({"tag":tag}));
-				continue;
-			}
-			if (typeof field === "string") {
-				field = [field];
-			}
-			field.forEach(f => newItem[f] = (typeof detail[k] != 'object' ? detail[k]: detail[k][0]));
-			
-		}
-		var pdflink = getPDF(itemInfo, detail);
-		if (pdflink) {
-			// Z.debug(pdflink);
-			newItem.attachments = [{
-				title: "Full Text PDF",
-				mimeType: "application/pdf",
-				url: pdflink
-			}];
-		}
-		// Core Periodical
-		if (detail.CorePeriodical && detail.CorePeriodical.length > 0) {
-			newItem.extra = "<" + 
-			detail.CorePeriodical.map((c) => core[c]).join(', ') + 
-			">";
-		}
-		newItem.complete();
-	});
+function addTags(newItem, node) {
+	var temp = ZU.xpath(node, "./div/a").map(e => ({"tag": e.textContent.trim()}));
+	newItem.tags = newItem.tags.concat(temp);
 }
 
-
-function addCreators(field, detail) {
-	var creators = [];
-	for (let pair of field) {
-		// Z.debug(pair);
-		var names = detail[pair[0]];
-		names = names.includes("%") ? names.split("%") : names;
-		if (names instanceof Array) {
-			names.forEach(
-				name => creators.push({lastName: name, creatorType:pair[1]})
-			);
-		} else {
-			creators.push({lastName: names, creatorType:pair[1]});
-		}
+function addDVI(newItem, node) {
+	var text = getTextPair(node)[1];
+	var result = text.match(/([0-9]*), ?([0-9]*)\((.*?)\)/);
+	if (result) {
+		newItem.date = result[1];
+		newItem.volume = result[2];
+		newItem.issue = result[3];
+	} else {
+		newItem.date = text;
 	}
-	var zhnamesplit = Z.getHiddenPref('zhnamesplit') === undefined ? true : false;
-	for (var i = 0, n = creators.length; i < n; i++) {
-		var creator = creators[i];
+}
 
-		if (creator.firstName) continue;
-		var lastSpace = creator.lastName.lastIndexOf(' ');
-		if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
+function addMDVI(newItem, node) {
+	var core = ZU.xpath(node, ".//span[@title]").map(e => e.title).join("\n");
+	newItem.extra = (newItem.extra ? newItem.extra : "") + "\n" + core;
+	if (node.querySelector("em")) newItem.pages = node.querySelector("em").textContent.replace("页", "").replace(",", "-");
+	var matchRes = node.textContent.match(/《(.*?)》([0-9]*年)?([0-9]*卷)?([0-9]*期)?/);
+	if (matchRes[1]) newItem.publicationTitle = matchRes[1];
+	if (matchRes[2]) newItem.date = matchRes[2].replace("年", "");
+	if (matchRes[3]) newItem.volume = matchRes[3].replace("卷", "");
+	if (matchRes[4]) newItem.issue = matchRes[4].replace("期", "");
+}
+
+function addCreators(newItem, node) {
+	var zhnamesplit = Z.getHiddenPref('zhnamesplit') === undefined ? true : false;
+	for (let name of getTextPair(node)[1].split(/\s+|%/)) {
+		if (name.includes("[")) continue;
+		var creator = {};
+		var lastSpace = name.lastIndexOf(' ');
+		if (name.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
 			// western name. split on last space
-			creator.firstName = creator.lastName.substr(0, lastSpace);
-			creator.lastName = creator.lastName.substr(lastSpace + 1);
+			creator.firstName = name.substr(0, lastSpace);
+			creator.lastName = name.substr(lastSpace + 1);
 		} else if (zhnamesplit) {
 			// zhnamesplit is true, split firstname and lastname.
 			// Chinese name. first character is last name, the rest are first name
-			creator.firstName = creator.lastName.substr(1);
-			creator.lastName = creator.lastName.charAt(0);
+			creator.firstName = name.substr(1);
+			creator.lastName = name.charAt(0);
+		}
+		if (getTextPair(node)[0].includes("导师")) {
+			creator.creatorType = "contributor"
+		} else if (getTextPair(node)[0].includes("发明")) {
+			creator.creatorType = "inventor";
+		} else if (getTextPair(node)[0].includes("代理人")) {
+			creator.creatorType = "attorneyAgent";
+		}else {
+			creator.creatorType = "author";
+		}
+		newItem.creators.push(creator);
+	}
+}
+
+
+function scrape(doc) {
+	Z.debug("---------------WanFang Data 20220405---------------");
+	var id = getIDFromPage(doc) || getIDFromURL(doc.URL);
+	var newItem = new Zotero.Item(id.dbname);
+	newItem.title = doc.title;
+	newItem.abstractNote = doc.description;
+	if (id.dbname != 'patent') newItem.tags = doc.querySelector('meta[name="keywords"]').content.split(',').map( e => ({tag: e}));
+	// Display full abstract
+	var clickMore = ZU.xpath(doc, "//span[@class='getMore' or text()='更多']");
+	if (clickMore.length > 0) clickMore[0].click() ;
+	var nodes = doc.querySelectorAll("div.detailList div");
+	if (nodes.length == 0) nodes = doc.querySelectorAll("div.table-tr"); // Medical
+	for (let node of nodes) {
+		var nodeTextPair = getTextPair(node);
+		if (nodeTextPair[0].trim() in nodeFieldMapper) {
+			typeof nodeFieldMapper[nodeTextPair[0]] == "string" 
+			? addField(newItem, nodeFieldMapper[nodeTextPair[0]], nodeTextPair[1].trim())
+			: nodeFieldMapper[nodeTextPair[0]](newItem, node)
 		}
 	}
-	return creators;
+	newItem.language = 'zh_CN';
+	// if (newItem.abstractNote == undefined) {  // Medical
+	// 	var abstract = doc.querySelector("div.abstracts");
+	// 	newItem.abstractNote = abstract.textContent.replace("摘要：", "");
+	// }
+	// newItem.abstractNote = newItem.abstractNote.trim().split("\n")[0];
+	newItem.url = doc.URL;
+	var pdflink = getPDF(doc);
+	Z.debug(pdflink);
+	if (pdflink) {
+		newItem.attachments.push({
+			url: pdflink,
+			title: "Full Text PDF",
+			mimeType: "application/pdf"
+		})
+	}
+	newItem.complete();
 }
 
 
@@ -248,7 +265,7 @@ function getIDFromURL(url) {
 		dbname = tmp[1].toLowerCase();
 		filename = tmp[2];
 	}
-	if (dbname && filename) {
+	if (dbname && filename.length < 60) {
 		return {dbname: getTypeFromDBName(dbname),
 		filename: filename, url:url};
 	} else {
@@ -256,10 +273,24 @@ function getIDFromURL(url) {
 	}
 }
 
+// Get ID from page
+function getIDFromPage(doc, url) {
+	var ele = doc.querySelector("a.download") || doc.querySelector("span.title-id-hidden");
+	if (ele === null) return false;
+	var hiddenId = ele.getAttribute('href') || ele.innerText;
+	var tmp = hiddenId.match(/(\w+)_(\w+)/);
+	if (tmp === null) return false;
+	return {dbname: getTypeFromDBName(tmp[1]),
+		filename: tmp[2], url: url || `https://d.wanfangdata.com.cn/${hiddenId.replace("_", "/")}`
+	}
+
+}
+
 // database and item type match
 function getTypeFromDBName(db) {
 	var dbType = {
 		periodical: "journalArticle",
+		perio: "journalArticle",
 		thesis: "thesis",
 		// claw: "statute",
 		conference: "conferencePaper",
@@ -282,7 +313,7 @@ function getTypeFromDBName(db) {
 
 function detectWeb(doc, url) {
 	if (url.includes("?q=") || url.includes("/advanced-search/")) return "multiple";
-	var id = getIDFromURL(url);
+	var id = getIDFromPage(doc) || getIDFromURL(url);
 	Z.debug(id);
 	if (id) {
 		return id.dbname;
@@ -294,22 +325,20 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, itemInfo) {
   var items = {};
   var found = false;
-  var rows = ZU.xpath(doc, "//div[@id='resultsList']/div[@class='item']");
+  var rows = ZU.xpath(doc, "//div[@class='normal-list']");
   if (!rows.length > 0) rows = doc.querySelectorAll("div.mod-results-list div.item");
   var idx = 1
   for (let row of rows) {
-	var title = ZU.xpath(row, ".//a[normalize-space()!='目录']")[0];
-	var href = title.href;
-	Z.debug(href); //for debug 20211120
-	items[href] = idx + " " + title.innerText;
-	Z.debug(href);	 //for debug 20211120
-	var id = getIDFromURL(href);
-	id.url = href;
-	Z.debug(id);	 //for debug 20211120
-	itemInfo[href] = id;
+	var title = ZU.xpath(row, ".//span[@class='title'] | .//div[@class='item-title']/a")[0];
+	var id = title.getAttribute("href") ? getIDFromURL(title.href) : getIDFromPage(row);
+	// Z.debug(id);
+	items[id.url] = idx + " " + title.innerText;
+	// var id = getIDFromURL(href);
+	// Z.debug(id);
+	itemInfo[id.url] = id;
 	idx +=1
   }
-  Z.debug(itemInfo);	 //for debug 20211120
+  // Z.debug(itemInfo);
   return items;
 }
 
@@ -318,31 +347,18 @@ function doWeb(doc, url) {
 		var itemInfo = {};
 		var items = getSearchResults(doc, itemInfo);
 		Z.selectItems(items, function(selectedItems) {
-			if (!selectedItems) return true;
-			var ids = [];
-			for (var href in selectedItems) {
-				ids.push(itemInfo[href]);
-			}
-			// Z.debug(ids);
-			scrape(ids, itemInfo)
+			if (selectedItems) ZU.processDocuments(Object.keys(selectedItems), scrape);
 		});
 	} else {
-		var id = getIDFromURL(url);
-		scrape([id], doc);
+		scrape(doc);
 	}
 }
 
-function getPDF(target, detail) {
-	if (Object.prototype.toString.call(target) == "[object Object]") {
-		var pdflink = "http://oss.wanfangdata.com.cn/www/" + detail.Title[0] + ".ashx?isread=true&type=perio&resourceId=" + detail.Id;
-	} else {
-		var pdflink = ZU.xpath(target, "//a[@class='onlineRead']");
-		var pdflink = pdflink.length > 0 ? pdflink[0].href : null;
-	}
-	return pdflink;
-}
-
-/** BEGIN TEST CASES **/
+function getPDF(doc) {
+	var pdflink = ZU.xpath(doc, "//a[text()='在线阅读']");
+	if (pdflink.length > 0 && pdflink[0].href) return pdflink[0].href;
+	return;
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -598,82 +614,6 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://d.wanfangdata.com.cn/periodical/10.1111%252Fbjd.18291",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "皮肤微生物组检查",
-				"creators": [
-					{
-						"lastName": "Prast‐Nielsen",
-						"creatorType": "author",
-						"firstName": "S."
-					},
-					{
-						"lastName": "Tobin",
-						"creatorType": "author",
-						"firstName": "A.‐M."
-					},
-					{
-						"lastName": "Adamzik",
-						"creatorType": "author",
-						"firstName": "K."
-					},
-					{
-						"lastName": "Powles",
-						"creatorType": "author",
-						"firstName": "A."
-					},
-					{
-						"lastName": "Hugerth",
-						"creatorType": "author",
-						"firstName": "L.W."
-					},
-					{
-						"lastName": "Sweeney",
-						"creatorType": "author",
-						"firstName": "C."
-					},
-					{
-						"lastName": "Kirby",
-						"creatorType": "author",
-						"firstName": "B."
-					},
-					{
-						"lastName": "Engstrand",
-						"creatorType": "author",
-						"firstName": "L."
-					},
-					{
-						"lastName": "Fry",
-						"creatorType": "author",
-						"firstName": "L."
-					}
-				],
-				"date": "2019-09-01 00:00:00",
-				"DOI": "10.1111/bjd.18291",
-				"ISSN": "0007-0963",
-				"abstractNote": "Summary 确定皮肤中存在何种细菌的传统方法是使用拭子取样。这种方法的一个局限是:拭子采样只能从皮肤表面采集,而细菌可能也存在于皮肤的深层。来自瑞典、爱尔兰和英国的研究者们调查了皮肤拭子和实际活检(组织样本)结果的差异。 在 16 名接受躯干或肢体皮损切除(手术去除)的患者中,从相同部位采集了一份拭子样本和一份 2 mm 环钻活检样本。首先润湿使用的拭子,之后对下方的脂肪层进行活检。对活检样本使用一种称为 16S rRNA 基因测序的技术来明确细菌的存在情况。这是一种非常敏感的技术,甚至在细菌不能被培养(生长)的情况发现细菌的 DNA。 活检显示称为梭菌目和拟杆菌门的细菌显著增多。梭菌目不需要氧气即可存活,因此预计可能在更深层皮肤发现。另一方面,其他细菌,如常见的金黄色葡萄球菌,在拭子样本中含量更为丰富。 更准确地了解皮肤中生活着何种细菌具有重要意义,因为这些细菌可能引发免疫反应,此反应对于特应性皮炎、银屑病和化脓性汗腺炎等皮肤病具有重要意义。 Linked Article: Prast‐Nielsen et al. Br J Dermatol 2019; 181:572–579",
-				"issue": "3",
-				"language": "eng",
-				"libraryCatalog": "Wanfang Data",
-				"pages": "e84-e84",
-				"publicationTitle": "British Journal of Dermatology",
-				"url": "https://d.wanfangdata.com.cn/periodical/10.1111%252Fbjd.18291",
-				"volume": "181",
-				"attachments": [],
-				"tags": [],
-				"notes": [
-					{
-						"note": "文章全文链接<br><a href=\"https://doi.org/10.1111/bjd.18291\">https://doi.org/10.1111/bjd.18291</a>"
-					}
-				],
 				"seeAlso": []
 			}
 		]
