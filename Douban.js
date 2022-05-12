@@ -1,7 +1,7 @@
 {
 	"translatorID": "fc353b26-8911-4c34-9196-f6f567c93901",
 	"label": "Douban",
-	"creator": "Ace Strong<acestrong@gmail.com>",
+	"creator": "不是船长<tanguangzhi@foxmail.com>,Ace Strong<acestrong@gmail.com>",
 	"target": "^https?://(www|book)\\.douban\\.com/(subject|doulist|people/[a-zA-Z._]*/(do|wish|collect)|.*?status=(do|wish|collect)|group/[0-9]*?/collection|tag)",
 	"minVersion": "2.0rc1",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-04 03:46:18"
+	"lastUpdated": "2022-04-14 09:59:01"
 }
 
 /*
@@ -47,146 +47,6 @@
  */
 // http://book.douban.com/
 
-
-// #################################
-// #### Local utility functions ####
-// #################################
-
-function trimTags(text) {
-	return text.replace(/(<.*?>)/g, "");
-}
-
-// #############################
-// ##### Scraper functions #####
-// #############################
-
-function scrapeAndParse(doc, url) {
-	// Z.debug({ url })
-	Zotero.Utilities.HTTP.doGet(url, function (page) {
-		// Z.debug(page)
-		var pattern;
-
-		// 类型 & URL
-		var itemType = "book";
-		var newItem = new Zotero.Item(itemType);
-		// Zotero.debug(itemType);
-		newItem.url = url;
-
-		// 标题
-		pattern = /<h1>([\s\S]*?)<\/h1>/;
-		if (pattern.test(page)) {
-			var title = pattern.exec(page)[1];
-			newItem.title = Zotero.Utilities.trim(trimTags(title));
-			// Zotero.debug("title: "+title);
-		}
-
-		// 又名
-		pattern = /<span [^>]*?>又名:(.*?)<\/span>/;
-		if (pattern.test(page)) {
-			var shortTitle = pattern.exec(page)[1];
-			newItem.shortTitle = Zotero.Utilities.trim(shortTitle);
-			// Zotero.debug("shortTitle: "+shortTitle);
-		}
-
-		// 作者
-
-		page = page.replace(/\n/g, "");
-		// Z.debug(page)
-		pattern = /<span>\s*<span[^>]*?>\s*作者<\/span>:(.*?)<\/span>/;
-		if (pattern.test(page)) {
-			var authorNames = trimTags(pattern.exec(page)[1]);
-			pattern = /(\[.*?\]|\(.*?\)|（.*?）)/g;
-			authorNames = authorNames.replace(pattern, "").split("/");
-			// Zotero.debug(authorNames);
-			for (let i = 0; i < authorNames.length; i++) {
-				let useComma = true;
-				pattern = /[A-Za-z]/;
-				if (pattern.test(authorNames[i])) {
-				// 外文名
-					pattern = /,/;
-					if (!pattern.test(authorNames[i])) {
-						useComma = false;
-					}
-				}
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(
-					Zotero.Utilities.trim(authorNames[i]),
-					"author", useComma));
-			}
-		}
-
-		// 译者
-		pattern = /<span>\s*<span [^>]*?>\s*译者<\/span>:(.*?)<\/span>/;
-		if (pattern.test(page)) {
-			var translatorNames = trimTags(pattern.exec(page)[1]);
-			pattern = /(\[.*?\])/g;
-			translatorNames = translatorNames.replace(pattern, "").split("/");
-			//		Zotero.debug(translatorNames);
-			for (let i = 0; i < translatorNames.length; i++) {
-				let useComma = true;
-				pattern = /[A-Za-z]/;
-				if (pattern.test(translatorNames[i])) {
-				// 外文名
-					useComma = false;
-				}
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(
-					Zotero.Utilities.trim(translatorNames[i]),
-					"translator", useComma));
-			}
-		}
-
-		// ISBN
-		pattern = /<span [^>]*?>ISBN:<\/span>(.*?)<br\/>/;
-		if (pattern.test(page)) {
-			var isbn = pattern.exec(page)[1];
-			newItem.ISBN = Zotero.Utilities.trim(isbn);
-			// Zotero.debug("isbn: "+isbn);
-		}
-
-		// 页数
-		pattern = /<span [^>]*?>页数:<\/span>(.*?)<br\/>/;
-		if (pattern.test(page)) {
-			var numPages = pattern.exec(page)[1];
-			newItem.numPages = Zotero.Utilities.trim(numPages);
-			// Zotero.debug("numPages: "+numPages);
-		}
-
-		// 出版社
-		pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br\/>/;
-		if (pattern.test(page)) {
-			var publisher = pattern.exec(page)[1];
-			newItem.publisher = Zotero.Utilities.trim(publisher);
-			// Zotero.debug("publisher: "+publisher);
-		}
-
-		// 丛书
-		pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br\/>/;
-		if (pattern.test(page)) {
-			var series = trimTags(pattern.exec(page)[1]);
-			newItem.series = Zotero.Utilities.trim(series);
-			// Zotero.debug("series: "+series);
-		}
-
-		// 出版年
-		pattern = /<span [^>]*?>出版年:<\/span>(.*?)<br\/>/;
-		if (pattern.test(page)) {
-			var date = pattern.exec(page)[1];
-			newItem.date = Zotero.Utilities.trim(date);
-			// Zotero.debug("date: "+date);
-		}
-
-		// 简介
-		var tags = ZU.xpath(doc, '//div[@id="db-tags-section"]/div//a');
-		for (let i in tags) {
-			newItem.tags.push(tags[i].textContent);
-		}
-		newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p');
-
-		newItem.complete();
-	});
-}
-// #########################
-// ##### API functions #####
-// #########################
 
 function detectWeb(doc, url) {
 	var pattern = /subject_search|doulist|people\/[a-zA-Z._]*?\/(?:do|wish|collect)|.*?status=(?:do|wish|collect)|group\/[0-9]*?\/collection|tag/;
@@ -234,13 +94,306 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrapeAndParse);
+			ZU.processDocuments(articles, scrapeAndParse);
 		});
 	}
 	else {
 		scrapeAndParse(doc, url);
 	}
 }
+
+
+
+
+function trimTags(text) {
+	return text.replace(/(<.*?>)/g, "");
+}
+
+// #############################
+// ##### Scraper functions #####
+// #############################
+
+function scrapeAndParse(doc, url) {
+	// Z.debug({ url })
+	ZU.doGet(url, function (page) {
+		// Z.debug(page)
+		var pattern, extra;
+
+		// 类型 & URL
+		var itemType = "book";
+		var newItem = new Zotero.Item(itemType);
+		// Zotero.debug(itemType);
+		newItem.url = url;
+
+		// 评分
+		let dbScore = ZU.xpathText(doc, '//*[@id="interest_sectl"]/div[1]/div[2]/strong')
+		dbScore= dbScore.trim()
+		if(dbScore==="  "||dbScore===""){
+			dbScore = "?"
+		}
+		
+		
+		// 评价人数
+		let commentNum = ZU.xpathText(doc, '//*[@id="interest_sectl"]/div[1]/div[2]/div/div[2]/span/a/span')
+		
+		// 副标题
+		pattern = /<span [^>]*?>副标题:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var subTitle = pattern.exec(page)[1].trim()
+		}
+		
+		// 原作名
+		pattern = /<span [^>]*?>原作名:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var originalTitle = pattern.exec(page)[1].trim()
+		}
+		
+		// 标题
+		let titleTemp = ""
+		pattern = /<h1>([\s\S]*?)<\/h1>/;
+		if (pattern.test(page)) {
+			var title = pattern.exec(page)[1];
+			title = ZU.trim(trimTags(title))
+			let originalTitlePre = " #"
+			if(!originalTitle){ // 当没有原名时,使用空字符
+				originalTitlePre = ""
+			}
+			if(title === subTitle){ // 判断下副标题与标题一样否,避免重复
+				extra = "👩‍⚖️" + commentNum+";"+"🔟"+dbScore+originalTitlePre+originalTitle
+			} else {
+				extra = "《"+title+" - "+subTitle+"》;"+ "👩‍⚖️" + commentNum+";"+"🔟"+dbScore+originalTitlePre+originalTitle			
+			}
+			extra = extra.replace(/( - )?undefined/g,"").replace("null","0")
+			extra += ';'
+			newItem.title = title;
+		}
+		
+		
+		// 短标题
+		newItem.shortTitle = "《"+title+"》"
+
+
+		// 目录
+		let catalogueList = ZU.xpath(doc, "//div[@class='indent' and contains(@id, 'dir_') and contains(@id, 'full')]")
+		let catalogue = ""
+		if(catalogueList.length>0){
+			catalogue = "<h1>#摘录-《"+title+"》目录</h1>\n"+catalogueList[0].innerHTML
+			newItem.notes.push({note:catalogue})
+		}
+		
+
+		// 作者
+		page = page.replace(/\n/g, "");
+		page = page.replace(/&nbsp;/g,"")
+		// Z.debug(page)
+		// 豆瓣里作者一栏及其不规范,这里使用多正则匹配更多情况,提高兼容性
+		let regexp = new RegExp() // 这里要把类型定义为RegExp,否则下面赋值后test(page)会失败
+		let regexp2 = new RegExp()
+		let regexp3 = new RegExp()
+		regexp = /<span>\s*<span[^>]*?>\s*作者<\/span>:(.*?)<\/span>/;
+		regexp2 = /<span class="pl">作者:<\/span>\s*?<a href="https:\/\/book\.douban\.com\/author\/\d+\/">\s*?\S*?\s*?\S*?<\/a>\s*?<br>/
+		regexp3 = /<span class="pl">作者:<\/span>\s*?<a href="https:\/\/book\.douban\.com\/author\/\d+\/">\s*?\S*?\s*?\S*?<\/a>\s+\//
+		if (regexp2.test(page)) { 
+			regexp = regexp2
+		} else if(regexp3.test(page)){
+			regexp = regexp3
+		}
+		
+		if (regexp.test(page)) { 
+			var authorNames = trimTags(regexp.exec(page)[0]);
+			pattern = /(\[.*?\]|\(.*?\)|（.*?）)/g;
+			authorNames = authorNames.replace(pattern, "").split("/");
+			// 国家
+			let country = RegExp.$1
+			country = country.replace("美国","美")
+			country = country.match(/[一-龥]+/g)
+			if(country===null){
+				country = [" "]
+			}
+
+			// Zotero.debug(authorNames);
+			let firstNameList = [] // 作者名列表
+			let lastNameList = [] // 作者姓列表
+			for (let i = 0; i < authorNames.length; i++) {
+				let useComma = true;
+				pattern = /[A-Za-z]/;
+				if (pattern.test(authorNames[i])) {
+				// 外文名
+					pattern = /,/;
+					if (!pattern.test(authorNames[i])) {
+						useComma = false;
+					}
+				}
+				// 实现欧美作者姓与名分开展示
+				let patt1 = new RegExp("·.+\.+")
+				let authorNameTemp = ""
+				let ming = ""
+				let xing = ""
+				
+				authorNames[i] = authorNames[i].replace(/作者:?(&nbsp;)?\s+/g, "")
+				if(authorNames[i].indexOf(".")!= -1){ // 名字中带.的   如:斯蒂芬·D.埃平格
+					authorNameTemp = authorNames[i].trim().split(".")
+					xing = authorNameTemp.pop() // 取数组最后一个值作为名
+					ming = authorNameTemp.join("·") // 姓氏
+				} else {
+					authorNames[i] =authorNames[i].replace(/•/g,"·") // 替换中文•分隔符为英文·
+					authorNameTemp = authorNames[i].trim().split("·")
+					xing = authorNameTemp.pop()
+					ming = authorNameTemp.join("·")
+				}
+				if(country[i]){
+					country = country[i].replace(/<\/a>/g,"")
+				}
+			
+				if(country!=" "){
+					country = "["+country+"]"
+				}
+				
+				firstNameList.push(country+ming)
+				lastNameList.push(xing)
+				
+				newItem.creators.push({firstName:firstNameList[i],lastName:lastNameList[i], creatorType:"author", fieldMode:true});
+				// newItem.creators.push(Zotero.Utilities.cleanAuthor(
+				// 	Zotero.Utilities.trim(authorNames[i]),
+				// 	"author", useComma));
+			}
+		}
+		
+
+		// 译者
+		pattern = /<span>\s*<span [^>]*?>\s*译者<\/span>:(.*?)<\/span>/;
+		if (pattern.test(page)) {
+			var translatorNames = trimTags(pattern.exec(page)[1]);
+			pattern = /(\[.*?\])/g;
+			translatorNames = translatorNames.replace(pattern, "").split("/");
+			//		Zotero.debug(translatorNames);
+			for (let i = 0; i < translatorNames.length; i++) {
+				let useComma = true;
+				pattern = /[A-Za-z]/;
+				if (pattern.test(translatorNames[i])) {
+				// 外文名
+					useComma = false;
+				}
+				newItem.creators.push(ZU.cleanAuthor(
+					ZU.trim(translatorNames[i]),
+					"translator", useComma));
+			}
+		}
+
+		// ISBN
+		pattern = /<span [^>]*?>ISBN:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var isbn = pattern.exec(page)[1];
+			newItem.ISBN = ZU.trim(isbn);
+			// Zotero.debug("isbn: "+isbn);
+		}
+
+		// 页数
+		pattern = /<span [^>]*?>页数:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var numPages = pattern.exec(page)[1];
+			newItem.numPages = ZU.trim(numPages);
+			// Zotero.debug("numPages: "+numPages);
+		}
+
+		// 出版社
+		pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br>/;
+		if (pattern.test(page)) {
+			var publisher = pattern.exec(page)[1];
+			newItem.publisher = ZU.trim(trimTags(publisher));
+			// Zotero.debug("publisher: "+publisher);
+		}
+
+		// 定价
+		pattern = /<span [^>]*?>定价:(.*?)<\/span>(.*?)<br\/?>/;
+		var price;
+		if (pattern.test(page)) {
+			var price = pattern.exec(page)[2];
+			// price = "60"
+			let prefix = price.match(/^((?!(\d+\.?\d*)).)*/g)[0] // 正则匹配前缀,如USD,CAD
+			price = price.match(/(\d+\.?\d*)/g)[0]
+			
+			// 小数点后2为保持
+			let numPrice = Number(price) 
+			numPrice = numPrice.toFixed(2)
+			
+			// 车同轨书同文,一统金额样式
+			if(prefix===""||prefix===" "||prefix.includes("CNY")){
+				price = numPrice+" 元;";
+			} else {
+				price = prefix+numPrice + ';';
+			}
+		}
+		
+		// 丛书
+		pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var series = trimTags(pattern.exec(page)[0]);
+			series = series.split("ISBN")[0].replace("丛书:", "");
+			newItem.series = ZU.trim(series);
+			// Zotero.debug("series: "+series);
+		}
+
+		// 出版年
+		pattern = /<span [^>]*?>出版年:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var date = pattern.exec(page)[1];
+			newItem.date = ZU.trim(date);
+			// Zotero.debug("date: "+date);
+		}
+	 
+		//补全0
+		function completeDate(value) {
+			return value < 10 ? "0"+value:value;
+		}
+		// 其他
+		newItem.extra = extra + price;
+	
+		
+		// 标签
+		var tags = ZU.xpath(doc, '//div[@id="db-tags-section"]/div[@class="indent"]/span/a[contains(@class, "tag") ]');
+		for (let i in tags) {
+			newItem.tags.push(tags[i].text);
+		}
+		
+		// 作者简介
+		let authorInfoList = ZU.xpath(doc, "//span[text()='作者简介']/parent::h2/following-sibling::div//div[@class='intro']")
+		// 这里会获取平级的元素,当有多个时(有展开全部按钮)取最后一个
+		let authorInfo = ""
+		let authorInfotwo = ""
+		if(authorInfoList.length>0){
+			authorInfo = authorInfoList[authorInfoList.length-1].innerHTML
+			// 正则提取<p>标签里面的元素,并添加换行
+			authorInfo = authorInfo.match(/<[a-zA-Z]+.*?>([\s\S]*?)<\/[a-zA-Z]+.*?>/g)
+			for(i=0;i<authorInfo.length;i++){
+			authorInfo[i] = authorInfo[i].match(/<[a-zA-Z]+.*?>([\s\S]*?)<\/[a-zA-Z]+.*?>/g)
+			authorInfotwo = authorInfotwo+RegExp.$1+"\n"
+			}
+		}
+	
+		
+		// 内容简介
+		// 获取展开全部按钮里面的内容
+		let contentInfoList = ZU.xpath(doc, "//span[text()='内容简介']/parent::h2/following-sibling::div[@id='link-report']//div[@class='intro']")
+		let contentInfo = ""
+		let contentInfoTwo = ""
+		if(contentInfoList.length>0){
+			contentInfo = contentInfoList[contentInfoList.length-1].innerHTML
+			contentInfo = contentInfo.match(/<[a-zA-Z]+.*?>([\s\S]*?)<\/[a-zA-Z]+.*?>/g)
+			for(i=0;i<contentInfo.length;i++){
+			contentInfo[i] = contentInfo[i].match(/<[a-zA-Z]+.*?>([\s\S]*?)<\/[a-zA-Z]+.*?>/g)
+			contentInfoTwo = contentInfoTwo+RegExp.$1+"\n"
+			}
+		}
+		
+		let abstractNoteTemp = "作者简介:"+"\n"+authorInfotwo+"\n"+
+		"内容简介:"+"\n"+contentInfoTwo
+
+		newItem.abstractNote = abstractNoteTemp
+		newItem.complete();
+	});
+}
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
