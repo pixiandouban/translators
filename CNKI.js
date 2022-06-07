@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-13 13:25:16"
+	"lastUpdated": "2022-06-07 08:41:30"
 }
 
 /*
@@ -40,7 +40,7 @@ function getRefWorksByID(ids, onDataAvailable) {
 		+ '&hid_kLogin_headerUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
 		+ '&hid_KLogin_FooterUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
 		+ '&CookieName=FileNameS';
-	ZU.doPost('https://kns.cnki.net/kns/ViewPage/viewsave.aspx?displayMode=Refworks', postData,
+	ZU.doPost('http://kns.cnki.net/kns/ViewPage/viewsave.aspx?displayMode=Refworks', postData,
 		function (text) {
 			var parser = new DOMParser();
 			var html = parser.parseFromString(text, "text/html");
