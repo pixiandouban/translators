@@ -2,14 +2,14 @@
 	"translatorID": "c198059a-3e3a-4ee5-adc0-c3011351365c",
 	"label": "Duxiu",
 	"creator": "Bo An",
-	"target": "https://.*?\\.duxiu\\.com",
+	"target": "https?://.*?\\.duxiu\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-22 02:03:07"
+	"lastUpdated": "2022-06-08 06:57:12"
 }
 
 /*
@@ -421,6 +421,7 @@ function pickClosestRole(namelist, index) {
 	}
 	return role;
 }
+
 
 
 /** BEGIN TEST CASES **/
