@@ -2,14 +2,14 @@
 	"translatorID": "c198059a-3e3a-4ee5-adc0-c3011351365c",
 	"label": "Duxiu",
 	"creator": "Bo An",
-	"target": "https?://.*?\\.duxiu\\.com",
+	"target": "^https?://((?!ucdrs).)*/(bookDetail|JourDetail|thesisDetail|CPDetail)\\.jsp\\?dxNumber=",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-08 06:57:12"
+	"lastUpdated": "2022-06-10 01:58:46"
 }
 
 /*
