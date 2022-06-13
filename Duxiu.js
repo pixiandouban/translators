@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-10 05:54:17"
+	"lastUpdated": "2022-06-13 16:57:37"
 }
 
 /*
@@ -162,199 +162,287 @@ function scrapeAndParse(doc, url) {
 		}
 		page = page.replace(/\n/g, "");
 
-		// 作者名 author name.
-		pattern = /<dd>[\s\S]*?作[\s]*者[\s\S]*?：([\s\S]*?)<\/dd>/;
-		if (pattern.test(page)) {
-			var authorNames = trimTags(pattern.exec(page)[1]);
-
-			// prevent English name from being split.
-			authorNames = authorNames.replace(/([a-z])，([A-Z])/g, "$1" + " " + "$2");
-
-			authorNames = authorNames.replace(/；/g, "，");
-			authorNames = Zotero.Utilities.trim(authorNames);
-
-			authorNames = authorNames.split("，");
-			// Zotero.debug(authorNames);
-			
-			// list of role titles. used to remove the role title from the name of the creator.
-			var titleMask = /本书主编$|本书副主编$|总主编$|总编辑$|总编$|编译$|编著$|主编$|副主编$|改编$|编$|著$|译$|选编$|摄影$|整理$|执笔$|合著$|撰$|编纂$|纂$|辑$|集注$|编辑$|原著$|主译$|绘$/;
-
-			for (let i = 0; i < authorNames.length; i++) {
-				var assignedRole = "";
-
-				if (!determineRoles(authorNames[i])) {
-					assignedRole = pickClosestRole(authorNames, i);
-				}
-				else {
-					assignedRole = determineRoles(authorNames[i]);
-				}
-				
-				var assignedName = Zotero.Utilities.trim(authorNames[i]).replace(titleMask, "");
-				
-				switch (assignedRole) {
-					// Not all conditions listed since 编,译,著 catch most of their variations already.
-
-					// series/chief editor
-					case '总主编':
-					case '总编辑':
-					case '总编':
-						newItem.creators.push({ lastName: assignedName,
-							creatorType: "seriesEditor",
-							fieldMode: 1 });
-						break;
+		
+		switch(itemType)
+		{
+			case "book":		//图书|专著[M]
+		
+				// 作者名 author name.
+				pattern = /<dd>[\s\S]*?作[\s]*者[\s\S]*?：([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var authorNames = trimTags(pattern.exec(page)[1]);
+		
+					// prevent English name from being split.
+					authorNames = authorNames.replace(/([a-z])，([A-Z])/g, "$1" + " " + "$2");
+		
+					authorNames = authorNames.replace(/；/g, "，");
+					authorNames = Zotero.Utilities.trim(authorNames);
+		
+					authorNames = authorNames.split("，");
+					// Zotero.debug(authorNames);
 					
-					// editor
-					case '编':
-					case '辑':
-					case '选编':
-					case '整理':
-						newItem.creators.push({ lastName: assignedName,
-							creatorType: "editor",
-							fieldMode: 1 });
-						break;
+					// list of role titles. used to remove the role title from the name of the creator.
+					var titleMask = /本书主编$|本书副主编$|总主编$|总编辑$|总编$|编译$|编著$|主编$|副主编$|改编$|编$|著$|译$|选编$|摄影$|整理$|执笔$|合著$|撰$|编纂$|纂$|辑$|集注$|编辑$|原著$|主译$|绘$/;
+		
+					for (let i = 0; i < authorNames.length; i++) {
+						var assignedRole = "";
+		
+						if (!determineRoles(authorNames[i])) {
+							assignedRole = pickClosestRole(authorNames, i);
+						}
+						else {
+							assignedRole = determineRoles(authorNames[i]);
+						}
 						
-					// author
-					case '著':
-					case '执笔':
-					case '撰':
-					case '绘':
-					case '纂':
-					case '摄影':
-					case '集解':
-					case '集注':
-						newItem.creators.push({ lastName: assignedName,
-							creatorType: "author",
-							fieldMode: 1 });
-						break;
-
-					// translator
-					case '译':
-						newItem.creators.push({ lastName: assignedName,
-							creatorType: "translator",
-							fieldMode: 1 });
-						break;
-					
-					// multiple roles
-					case '编著':
-						newItem.creators.push({ lastName: assignedName,
-							creatorType: "author",
-							fieldMode: 1 });
-						newItem.creators.push({ lastName: assignedName,
-							creatorType: "editor",
-							fieldMode: 1 });
-						break;
-					case '编译':
-						newItem.creators.push({ lastName: assignedName,
-							creatorType: "editor",
-							fieldMode: 1 });
-						newItem.creators.push({ lastName: assignedName,
-							creatorType: "translator",
-							fieldMode: 1 });
-						break;
-
-					// default as author
-					default:
-						newItem.creators.push({ lastName: assignedName,
-							creatorType: "author",
-							fieldMode: 1 });
+						var assignedName = Zotero.Utilities.trim(authorNames[i]).replace(titleMask, "");
+						
+						switch (assignedRole) {
+							// Not all conditions listed since 编,译,著 catch most of their variations already.
+		
+							// series/chief editor
+							case '总主编':
+							case '总编辑':
+							case '总编':
+								newItem.creators.push({ lastName: assignedName,
+									creatorType: "seriesEditor",
+									fieldMode: 1 });
+								break;
+							
+							// editor
+							case '编':
+							case '辑':
+							case '选编':
+							case '整理':
+								newItem.creators.push({ lastName: assignedName,
+									creatorType: "editor",
+									fieldMode: 1 });
+								break;
+								
+							// author
+							case '著':
+							case '执笔':
+							case '撰':
+							case '绘':
+							case '纂':
+							case '摄影':
+							case '集解':
+							case '集注':
+								newItem.creators.push({ lastName: assignedName,
+									creatorType: "author",
+									fieldMode: 1 });
+								break;
+		
+							// translator
+							case '译':
+								newItem.creators.push({ lastName: assignedName,
+									creatorType: "translator",
+									fieldMode: 1 });
+								break;
+							
+							// multiple roles
+							case '编著':
+								newItem.creators.push({ lastName: assignedName,
+									creatorType: "author",
+									fieldMode: 1 });
+								newItem.creators.push({ lastName: assignedName,
+									creatorType: "editor",
+									fieldMode: 1 });
+								break;
+							case '编译':
+								newItem.creators.push({ lastName: assignedName,
+									creatorType: "editor",
+									fieldMode: 1 });
+								newItem.creators.push({ lastName: assignedName,
+									creatorType: "translator",
+									fieldMode: 1 });
+								break;
+		
+							// default as author
+							default:
+								newItem.creators.push({ lastName: assignedName,
+									creatorType: "author",
+									fieldMode: 1 });
+						}
+					}
 				}
-			}
-		}
 		
-		// 出版地点 publication place.
-		pattern = /<dd>[\s\S]*出版发行[\s\S]*?<\/span>([\s\S]*?)：[\s\S]*?<\/dd>/;
-		if (pattern.test(page)) {
-			var place = pattern.exec(page)[1];
-			if (place.includes(",")) {
-				// if publication place not provided, replace publisher with trimed info. from place field.
-				newItem.publisher = Zotero.Utilities.trim(place.substring(0, place.indexOf(",")));
-				place = "";
-			}
-			else if (Zotero.Utilities.trim(place).match(/^\d/)) {
-				place = "";
-			}
-			else {
-				newItem.place = Zotero.Utilities.trim(place);
-			}
-		}
+					
+						// 出版地点 publication place.
+				pattern = /<dd>[\s\S]*出版发行[\s\S]*?<\/span>([\s\S]*?)：[\s\S]*?<\/dd>/;
+				if (pattern.test(page)) {
+					var place = pattern.exec(page)[1];
+					if (place.includes(",")) {
+						// if publication place not provided, replace publisher with trimed info. from place field.
+						newItem.publisher = Zotero.Utilities.trim(place.substring(0, place.indexOf(",")));
+						place = "";
+					}
+					else if (Zotero.Utilities.trim(place).match(/^\d/)) {
+						place = "";
+					}
+					else {
+						newItem.place = Zotero.Utilities.trim(place);
+					}
+				}
+					
+				// 出版社 publisher.
+				pattern = /<dd>[\s\S]*出版发行[\s\S]*?：([\s\S]*?),[\s\S]*?<\/dd>/;
+				if (pattern.test(page)) {
+					var publisher = pattern.exec(page)[1];
+					if (place) {
+						newItem.publisher = Zotero.Utilities.trim(publisher);
+					}
+				}
+				
+				// 出版时间 publication date.
+				pattern = /<dd>[\s\S]*出版发行[\s\S]*?,([\s\S]*?)<\/dd>/;
+				if (!pattern.test(page)) {
+					pattern = /<dd>[\s\S]*出版发行[\s\S]*?([\s\S]*?)<\/dd>/;
+				}
+				if (pattern.test(page)) {
+				// preserve Chinese characters used for the publication date of old books.
+					var date = pattern.exec(page)[1].replace(/[^.\d民国清光绪宣统一二三四五六七八九年-]/g, "");
+					newItem.date = Zotero.Utilities.trim(date);
+				}
+				
+				// ISBN
+				pattern = /<dd>[\s\S]*?ISBN号[\D]*(.*[\d])/;
+				if (pattern.test(page)) {
+					var isbn = pattern.exec(page)[1];
+					newItem.ISBN = Zotero.Utilities.trim(isbn);
+					if (newItem.ISBN.length < 13) {
+						newItem.extra = "出版号: " + newItem.ISBN + "\n" + newItem.extra;
+					}
 		
-		// 出版社 publisher.
-		pattern = /<dd>[\s\S]*出版发行[\s\S]*?：([\s\S]*?),[\s\S]*?<\/dd>/;
-		if (pattern.test(page)) {
-			var publisher = pattern.exec(page)[1];
-			if (place) {
-				newItem.publisher = Zotero.Utilities.trim(publisher);
-			}
-		}
+					// Zotero does not allow non-standard but correct ISBN such as one that starts with 7
+					else if (newItem.ISBN.length == 13 && newItem.ISBN.startsWith("7")) {
+						newItem.ISBN = "978-" + newItem.ISBN;
+					}
+				}
 		
-		// 出版时间 publication date.
-		pattern = /<dd>[\s\S]*出版发行[\s\S]*?,([\s\S]*?)<\/dd>/;
-		if (!pattern.test(page)) {
-			pattern = /<dd>[\s\S]*出版发行[\s\S]*?([\s\S]*?)<\/dd>/;
-		}
-		if (pattern.test(page)) {
-		// preserve Chinese characters used for the publication date of old books.
-			var date = pattern.exec(page)[1].replace(/[^.\d民国清光绪宣统一二三四五六七八九年-]/g, "");
-			newItem.date = Zotero.Utilities.trim(date);
-		}
+				// 页数 number of pages.
+				pattern = /页[\s]*数\D*([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var numPages = pattern.exec(page)[1];
+					newItem.numPages = Zotero.Utilities.trim(numPages);
+				}
+				
+				// 丛书 book series.
+				pattern = /<dd>[\s\S]*丛书名[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var series = trimTags(pattern.exec(page)[1]);
+					newItem.series = Zotero.Utilities.trim(series);
+				}
+				
+				// 原书定价 retail price.
+				pattern = /原书定价\D*([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var price = pattern.exec(page)[1];
+					newItem.price = Zotero.Utilities.trim(price);
+					newItem.extra += "原书定价: " + newItem.price + "\n";
+				}
+				
+				// 开本 edition format.
+				pattern = /<dd>[\s\S]*开本[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var format = trimTags(pattern.exec(page)[1]);
+					newItem.format = Zotero.Utilities.trim(format);
+					newItem.extra += "开本: " + newItem.format + "\n";
+				}
+				// 主题词 subject terms.
+				pattern = /<dd>[\s\S]*主题词[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var subjectTerms = trimTags(pattern.exec(page)[1]);
+					newItem.subjectTerms = Zotero.Utilities.trim(subjectTerms);
+				}
+			
+				// 中图法分类号 CLC classification number.
+				pattern = /<dd>[\s\S]*中图法分类号[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var callNumber = trimTags(pattern.exec(page)[1]);
+					newItem.callNumber = Zotero.Utilities.trim(callNumber);
+				}		
 		
-		// ISBN
-		pattern = /<dd>[\s\S]*?ISBN号[\D]*(.*[\d])/;
-		if (pattern.test(page)) {
-			var isbn = pattern.exec(page)[1];
-			newItem.ISBN = Zotero.Utilities.trim(isbn);
-			if (newItem.ISBN.length < 13) {
-				newItem.extra = "出版号: " + newItem.ISBN + "\n" + newItem.extra;
-			}
+				// 内容提要 abstract.
+				pattern = /<dd>[\s\S]*内容提要[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var abstractNote = trimTags(pattern.exec(page)[1]);
+					newItem.abstractNote = Zotero.Utilities.trim(abstractNote).replace(/&mdash;/g, "-") + "\n\n";
+				}											
+				break;
+			case "thesis": //学位论文[D]
+				// 作者名 author name.
+				pattern = /<dd>[\s\S]*?作[\s]*者[\s\S]*?：([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var author = trimTags(pattern.exec(page)[1]);
+					newItem.author = Zotero.Utilities.trim(author);
+				}				
+				
+				//学位授予单位 university.
+				pattern = /<dd>[\s\S]*学位授予单位[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var university = trimTags(pattern.exec(page)[1]);
+					newItem.university = Zotero.Utilities.trim(university);
+				}	
+				
+				//学位名称 thesisType
+				pattern = /<dd>[\s\S]*学位名称[\s\S]*?>([\s\S]*?)<\/dd>/;				
+				if (pattern.test(page)) {
+					var thesisType = trimTags(pattern.exec(page)[1]);
+					newItem.thesisType = Zotero.Utilities.trim(thesisType);
+				}									
 
-			// Zotero does not allow non-standard but correct ISBN such as one that starts with 7
-			else if (newItem.ISBN.length == 13 && newItem.ISBN.startsWith("7")) {
-				newItem.ISBN = "978-" + newItem.ISBN;
-			}
-		}
+				//学位年度 date
+				pattern = /<dd>[\s\S]*学位年度[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var date = trimTags(pattern.exec(page)[1]);
+					newItem.date = Zotero.Utilities.trim(date);
+				}	
+							
+				break;
+			case "journalArticle": //期刊论文[J]
+				// 作者名 author name.
+				
+				//刊名 publicationTitle
+				pattern = /<dd>[\s\S]*刊  名[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var publicationTitle = trimTags(pattern.exec(page)[1]);
+					newItem.publicationTitle = Zotero.Utilities.trim(publicationTitle);
+				}					
+				
+				//出版日期 date
+				pattern = /<dd>[\s\S]*出版日期[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var date = trimTags(pattern.exec(page)[1]);
+					newItem.date = Zotero.Utilities.trim(date);
+				}					
+				
+				//卷号 volume
+				
+				//期号 issue
+				pattern = /<dd>[\s\S]*期  号[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var issue = trimTags(pattern.exec(page)[1]);
+					newItem.issue = Zotero.Utilities.trim(issue);
+				}					
+											
+				//页码 pages
+				
+				//ISSN
+				pattern = /<dd>[\s\S]*?ISSN[\D]*(.*[\d])/;
+				if (pattern.test(page)) {
+					var issn = pattern.exec(page)[1];
+					newItem.ISSN = Zotero.Utilities.trim(issn);
+				}				
+				
+				//关键词
+				break;
+			case "newspaperArticle": //报纸[N]
+				break;
+			case "conferencePaper": //会议论文[C]
+				break;
+			default:
+		}	
 
-		// 页数 number of pages.
-		pattern = /页[\s]*数\D*([\s\S]*?)<\/dd>/;
-		if (pattern.test(page)) {
-			var numPages = pattern.exec(page)[1];
-			newItem.numPages = Zotero.Utilities.trim(numPages);
-		}
-		
-		// 丛书 book series.
-		pattern = /<dd>[\s\S]*丛书名[\s\S]*?>([\s\S]*?)<\/dd>/;
-		if (pattern.test(page)) {
-			var series = trimTags(pattern.exec(page)[1]);
-			newItem.series = Zotero.Utilities.trim(series);
-		}
-		// 原书定价 retail price.
-		pattern = /原书定价\D*([\s\S]*?)<\/dd>/;
-		if (pattern.test(page)) {
-			var price = pattern.exec(page)[1];
-			newItem.price = Zotero.Utilities.trim(price);
-			newItem.extra += "原书定价: " + newItem.price + "\n";
-		}
-		
-		// 开本 edition format.
-		pattern = /<dd>[\s\S]*开本[\s\S]*?>([\s\S]*?)<\/dd>/;
-		if (pattern.test(page)) {
-			var format = trimTags(pattern.exec(page)[1]);
-			newItem.format = Zotero.Utilities.trim(format);
-			newItem.extra += "开本: " + newItem.format + "\n";
-		}
-		// 主题词 subject terms.
-		pattern = /<dd>[\s\S]*主题词[\s\S]*?>([\s\S]*?)<\/dd>/;
-		if (pattern.test(page)) {
-			var subjectTerms = trimTags(pattern.exec(page)[1]);
-			newItem.subjectTerms = Zotero.Utilities.trim(subjectTerms);
-		}
-	
-		// 中图法分类号 CLC classification number.
-		pattern = /<dd>[\s\S]*中图法分类号[\s\S]*?>([\s\S]*?)<\/dd>/;
-		if (pattern.test(page)) {
-			var callNumber = trimTags(pattern.exec(page)[1]);
-			newItem.callNumber = Zotero.Utilities.trim(callNumber);
-		}		
-		
 		// 参考文献格式 reference format.
 		pattern = /<dd>[\s\S]*参考文献格式[\s\S]*?>([\s\S]*?)<\/dd>/;
 		if (pattern.test(page)) {
@@ -363,21 +451,7 @@ function scrapeAndParse(doc, url) {
 			
 			newItem.extra = "参考格式: " + newItem.refFormat + "\n" + newItem.extra;
 		}
-		
-		// 内容提要 abstract.
-		pattern = /<dd>[\s\S]*内容提要[\s\S]*?>([\s\S]*?)<\/dd>/;
-		if (pattern.test(page)) {
-			var abstractNote = trimTags(pattern.exec(page)[1]);
-			newItem.abstractNote = Zotero.Utilities.trim(abstractNote).replace(/&mdash;/g, "-") + "\n\n";
-		}
-		
-		//学位授予单位 university.
-		pattern = /<dd>[\s\S]*学位授予单位[\s\S]*?>([\s\S]*?)<\/dd>/;
-		if (pattern.test(page)) {
-			var university = trimTags(pattern.exec(page)[1]);
-			newItem.university = Zotero.Utilities.trim(university);
-		}
-		
+				
 		// use subject terms to populate abstract
 		if (newItem.subjectTerms) {
 			newItem.abstractNote = newItem.abstractNote + "主题词: " + newItem.subjectTerms;
