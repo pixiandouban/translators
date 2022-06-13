@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-10 05:54:18"
+	"lastUpdated": "2022-06-10 05:54:17"
 }
 
 /*
@@ -369,6 +369,13 @@ function scrapeAndParse(doc, url) {
 		if (pattern.test(page)) {
 			var abstractNote = trimTags(pattern.exec(page)[1]);
 			newItem.abstractNote = Zotero.Utilities.trim(abstractNote).replace(/&mdash;/g, "-") + "\n\n";
+		}
+		
+		//学位授予单位 university.
+		pattern = /<dd>[\s\S]*学位授予单位[\s\S]*?>([\s\S]*?)<\/dd>/;
+		if (pattern.test(page)) {
+			var university = trimTags(pattern.exec(page)[1]);
+			newItem.university = Zotero.Utilities.trim(university);
 		}
 		
 		// use subject terms to populate abstract
