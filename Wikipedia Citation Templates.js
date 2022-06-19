@@ -1,6 +1,5 @@
 {
 	"translatorID": "3f50aaac-7acc-4350-acd0-59cb77faf620",
-	"translatorType": 2,
 	"label": "Wikipedia Citation Templates",
 	"creator": "Simon Kornblith",
 	"target": "txt",
@@ -11,7 +10,8 @@
 		"exportCharset": "UTF-8"
 	},
 	"inRepository": true,
-	"lastUpdated": "2017-03-13 11:45:52"
+	"translatorType": 2,
+	"lastUpdated": "2022-06-19 02:44:37"
 }
 
 /*
@@ -56,7 +56,7 @@ var typeMap = {
 	journalArticle:"Cite journal",
 	magazineArticle:"Cite news",
 	newspaperArticle:"Cite news",
-	thesis:"Cite paper",
+	thesis:"Cite thesis",
 	letter:"Cite",
 	manuscript:"Cite book",
 	interview:"Cite interview",
@@ -276,6 +276,10 @@ function doExport() {
 				properties.work = item.publicationTitle;
 			}
 		}
+
+		if (type == "Cite thesis"){
+			properties.degree = item.type;
+		}
 		
 		if (type == "Cite web" && item.type) {
 			properties.format = item.type;
@@ -405,3 +409,7 @@ function doExport() {
 function escapeWiki(markup) {
 	return markup.replace('|', '{{!}}');
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
