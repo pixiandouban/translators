@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-13 16:57:37"
+	"lastUpdated": "2022-06-19 02:33:25"
 }
 
 /*
@@ -401,9 +401,26 @@ function scrapeAndParse(doc, url) {
 				break;
 			case "journalArticle": //期刊论文[J]
 				// 作者名 author name.
+				pattern = /<dd>[\s\S]*?作[\s]*者[\s\S]*?：([\s\S]*?)<\/dd>/;	
+				if (pattern.test(page)) {
+					var authorNames = trimTags(pattern.exec(page)[1]);
+		
+					// prevent English name from being split.
+					authorNames = authorNames.replace(/([a-z])，([A-Z])/g, "$1" + " " + "$2");
+		
+					authorNames = authorNames.replace(/；/g, "，");
+					authorNames = Zotero.Utilities.trim(authorNames);
+		
+					authorNames = authorNames.split("，");	
+
+					var titleMask = /本书主编$|本书副主编$|总主编$|总编辑$|总编$|编译$|编著$|主编$|副主编$|改编$|编$|著$|译$|选编$|摄影$|整理$|执笔$|合著$|撰$|编纂$|纂$|辑$|集注$|编辑$|原著$|主译$|绘$/;
+					var assignedName = Zotero.Utilities.trim(authorNames[i]).replace(titleMask, "");
+					newItem.creators.push({ lastName: assignedName,
+							creatorType: "author", fieldMode: 1 });	
+				}										
 				
 				//刊名 publicationTitle
-				pattern = /<dd>[\s\S]*刊  名[\s\S]*?>([\s\S]*?)<\/dd>/;
+				pattern = /<dd>[\s\S]*刊[\s]*名[\s\S]*?>([\s\S]*?)<\/dd>/;
 				if (pattern.test(page)) {
 					var publicationTitle = trimTags(pattern.exec(page)[1]);
 					newItem.publicationTitle = Zotero.Utilities.trim(publicationTitle);
@@ -417,12 +434,18 @@ function scrapeAndParse(doc, url) {
 				}					
 				
 				//卷号 volume
+				pattern = /<dd>[\s\S]*卷[\s]*号[\s\S]*?>([\s\S]*?)<\/dd>/;
+				if (pattern.test(page)) {
+					var volume = trimTags(pattern.exec(page)[1]);
+					newItem.volume = Zotero.Utilities.trim(volume);
+				}														
 				
 				//期号 issue
-				pattern = /<dd>[\s\S]*期  号[\s\S]*?>([\s\S]*?)<\/dd>/;
+				pattern = /<dd>[\s\S]*期[\s]*号[\s\S]*?>([\s\S]*?)<\/dd>/;
 				if (pattern.test(page)) {
 					var issue = trimTags(pattern.exec(page)[1]);
 					newItem.issue = Zotero.Utilities.trim(issue);
+					Zotero.debug("issue= "+ newItem.issue);
 				}					
 											
 				//页码 pages

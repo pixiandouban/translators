@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-02 23:10:13"
+	"lastUpdated": "2022-05-02 23:26:54"
 }
 
 /**
@@ -80,14 +80,15 @@ function scrape(doc, url) {
 	item.date = update;
 
 	//const authors = doc.querySelectorAll("div#author-box > div.author.author-noshadow > span.n-author.mul-author > span.author-span > span");	
-	const authors =doc.querySelectorAll("div#author-box > div.author.author-shadow > span.n-author > span.author-span.au-show > span");
+	const authorbox = doc.getElementById("author-box");
+	const authors =authorbox.querySelectorAll("div.author.author-shadow > span.n-author > span.author-span.au-show > span");
 	//Z.debug("authors: " + authors);
 	Z.debug("authors.length: " + authors.length);
 	
 	//const authorbox = doc.getElementById("author-box");
-	//var authors1 = authorbox.querySelectorAll("div.author.author-noshadow >  span.n-author.mul-author > span.author-span > span");
+	var authors1 = authorbox.querySelectorAll("div.author.author-noshadow >  span.n-author.mul-author > span.author-span > span");
 	//Z.debug("authors1: " + authors1);
-	//Z.debug("authors1.length: " + authors1.length);
+	Z.debug("authors1.length: " + authors1.length);
 
 	if(authors.length > 1){
 		Z.debug("authors.length > 1");

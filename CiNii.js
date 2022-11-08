@@ -9,13 +9,17 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-24 13:12:41"
+	"lastUpdated": "2021-12-20 11:34:52"
 }
 
 function detectWeb(doc, url) {
 	if (url.match(/naid/)) {
 		return "journalArticle";
-	} else if (doc.evaluate('//a[contains(@href, "/naid/")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	}
+	else if(url.match(/ncid/)){
+		return "book";
+	}
+	else if (doc.evaluate('//a[contains(@href, "/naid/")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	}
 }
@@ -29,7 +33,7 @@ function doWeb(doc, url) {
 		while (link = links.iterateNext()) {
 			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
 		}
-	Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
 			}

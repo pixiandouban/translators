@@ -1,15 +1,15 @@
 {
-	"translatorID": "02565b25-1f26-4edd-89ac-f2cdf46ea5fe",
-	"label": "Xinhua New Agency (zh)",
+	"translatorID": "c27d9e99-7e5d-4b87-9db2-cabec5d8d756",
+	"label": "ScienceNet.cn News",
 	"creator": "pixiandouban",
-	"target": "^https?:\\/\\/([a-z]+\\.news\\.cn|[a-z]+\\.xinhuanet.com)",
+	"target": "^https?:\\/\\/news.sciencenet.cn",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-16 11:44:41"
+	"lastUpdated": "2022-01-16 14:01:49"
 }
 
 /*
