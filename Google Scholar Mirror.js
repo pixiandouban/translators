@@ -1,7 +1,7 @@
 {
 	"translatorID": "8a5f6823-5d9a-4fa5-a9bd-7455be33f00f",
 	"label": "Google Scholar Mirror",
-	"creator": "pixiandouban",
+	"creator": "Simon Kornblith, Frank Bennett, Aurimas Vinckevicius, pixiandouban",
 	"target": "^https?://(sc\\.panda321\\.com|xs2\\.dailyheadlines\\.cc|xs2\\.zidianzhan\\.net|scholar\\.lanfanshu\\.cn|xs\\.lsqwl\\.org)/(scholar(_case)?\\?|citations\\?)",
 	"minVersion": "5.0",
 	"maxVersion": "",
@@ -49,7 +49,7 @@ function detectWeb(doc, url) {
 		if (getProfileResults(doc, true)) {
 			return "multiple";
 		}
-		
+
 		// individual saved citation
 		var link = ZU.xpathText(doc, '//a[@class="gsc_oci_title_link"]/@href');
 		if (!link) return false;
@@ -227,12 +227,12 @@ function scrapeIds(doc, ids) {
 							}
 						}
 					}
-					
+
 					// fix titles in all upper case, e.g. some patents in search results
 					if (item.title.toUpperCase() == item.title) {
 						item.title = ZU.capitalizeTitle(item.title);
 					}
-					
+
 					// delete "others" as author
 					if (item.creators.length) {
 						var lastCreatorIndex = item.creators.length - 1,
@@ -241,18 +241,18 @@ function scrapeIds(doc, ids) {
 							item.creators.splice(lastCreatorIndex, 1);
 						}
 					}
-					
+
 					// clean author names
 					for (let j = 0, m = item.creators.length; j < m; j++) {
 						if (!item.creators[j].firstName) continue;
-			
+
 						item.creators[j] = ZU.cleanAuthor(
 							item.creators[j].lastName + ', '
 								+ item.creators[j].firstName,
 							item.creators[j].creatorType,
 							true);
 					}
-					
+
 					// attach linked document as attachment if available
 					var documentLinkTarget = attr(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a', 'href');
 					var documentLinkTitle = text(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a');
@@ -275,7 +275,7 @@ function scrapeIds(doc, ids) {
 						}
 						item.attachments.push(attachment);
 					}
-					
+
 					// Attach linked page as snapshot if available
 					if (titleLink && titleLink != documentLinkTarget) {
 						item.attachments.push({
@@ -299,7 +299,7 @@ function scrapeIds(doc, ids) {
  * ### Scraper Functions ###
  * #########################
  */
- 
+
 var bogusItemID = 1;
 
 var scrapeCase = function (doc, url) {
