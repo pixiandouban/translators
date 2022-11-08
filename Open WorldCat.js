@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-19 04:40:51"
+	"lastUpdated": "2022-11-01 19:40:33"
 }
 
 /*
@@ -118,12 +118,22 @@ const RECORD_MAPPING = {
 };
 
 function detectWeb(doc, url) {
-	if (url.includes('/title/') && doc.querySelector('#__NEXT_DATA__')) {
-		return getItemType(JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record);
+	let nextData = doc.querySelector('#__NEXT_DATA__');
+	if (url.includes('/title/') && nextData) {
+		try {
+			return getItemType(JSON.parse(nextData.textContent).props.pageProps.record);
+		}
+		catch (e) {
+			return 'book';
+		}
 	}
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
+	else if (url.includes('/search?')) {
+		Z.monitorDOMChanges(doc.body, { childList: true, subtree: true });
+	}
+
 	return false;
 }
 
@@ -172,8 +182,12 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	let record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
-	if (!url.includes('/' + record.oclcNumber)) {
+	let record = null;
+	try {
+		record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
+	}
+	catch (e) {}
+	if (!record || !url.includes('/' + record.oclcNumber)) {
 		Zotero.debug('__NEXT_DATA__ is stale; requesting page again');
 		doc = await requestDocument(url);
 		record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
