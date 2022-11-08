@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-07 06:31:22"
+	"lastUpdated": "2022-11-08 22:57:48"
 }
 
 /*
@@ -665,10 +665,7 @@ ItemFactory.prototype.saveItemCommonVars = function () {
 
 
 
-/** BEGIN TEST CASES **/
-var testCases = [
-]
-/** END TEST CASES **/
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -676,5 +673,9 @@ var testCases = [
 		"url": "https://sc.panda321.com/scholar?as_sdt=0%2C5&q=weather&btnG=",
 		"items": "multiple"
 	}
+]
+/** END TEST CASES **/
+/** BEGIN TEST CASES **/
+var testCases = [
 ]
 /** END TEST CASES **/
