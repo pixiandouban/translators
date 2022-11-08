@@ -2,7 +2,7 @@
 	"translatorID": "8a5f6823-5d9a-4fa5-a9bd-7455be33f00f",
 	"label": "Google Scholar Mirror",
 	"creator": "Simon Kornblith, Frank Bennett, Aurimas Vinckevicius, pixiandouban",
-	"target": "^https?://(sc\\.panda321\\.com|xs2\\.dailyheadlines\\.cc|xs2\\.zidianzhan\\.net|scholar\\.lanfanshu\\.cn|xs\\.lsqwl\\.org)/(scholar(_case)?\\?|citations\\?)",
+	"target": "^https?://(sc\\.panda321\\.com|xs2\\.dailyheadlines\\.cc|xs2\\.zidianzhan\\.net|scholar\\.lanfanshu\\.cn|xs\\.lsqwl\\.org|xueshu\\.studiodahu\\.com|xs\\.studiodahu\\.com)/(scholar(_case)?\\?|citations\\?)",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
