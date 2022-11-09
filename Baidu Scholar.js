@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-28 04:27:11"
+	"lastUpdated": "2022-11-09 14:50:23"
 }
 
 /*
@@ -61,6 +61,13 @@ function detectWeb(doc, url) {
 	if (url.includes('paperid=')) {
 		return "journalArticle";
 	}
+	else if(url.includes('scholarID')){
+		if(getProfileResults(doc, true)) {
+			return "multiple";
+		}
+
+		//reserverd
+	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -82,9 +89,24 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
+function getProfileResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('h3.res_t > a');
+	for (var i = 0; i < rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
+		if(getSearchResults(doc, true)){
 		let ids = [];
 		Zotero.selectItems(getSearchResults(doc, false, ids), function (items) {
 			if (!items) {
@@ -97,6 +119,23 @@ function doWeb(doc, url) {
 			}
 			scrape(doc, ids);
 		});
+		}
+		else if (getProfileResults(doc,true)){
+			let ids = [];
+			Zotero.selectItems(getSearchResults(doc, false, ids), function (items){
+				if(!items){
+					return;		
+				}
+				var articles = [];
+				for (var i in items){
+					ids.push(getIDFromUrl(i));
+					articles.push(i);
+				}
+				// here we need open these pages before calling scrape
+				ZU.processDocuments(articles, scrape);				
+				//scrape(doc, ids);
+			});
+		}
 	}
 	else {
 		scrape(doc, [getIDFromUrl(url)]);
@@ -111,17 +150,21 @@ function scrape(doc, ids) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, newItem) {
 			newItem.url = url;
-			if (doc.querySelector("p.abstract")) newItem.abstractNote = doc.querySelector("p.abstract").innerText.trim();
-			if (doc.querySelector("p.kw_main")) {
-				newItem.tags = doc.querySelector("p.kw_main").innerText.split("；");
+			if (doc.querySelector("p.abstract")) {
+				newItem.abstractNote = doc.querySelector("p.abstract").innerText.trim();
+				Z.debug(newItem.abstractNote);
 			}
-			Z.debug(newItem.abstractNote);
-			Z.debug(newItem.tags);
+
+			if (doc.querySelector("p.kw_main")) {
+				newItem.tags = doc.querySelector("p.kw_main").innerText.split(" ");	
+				Z.debug(newItem.tags);
+			}
 			newItem.complete();
 		});
 		translator.translate();
 	});
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
