@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-02 23:26:54"
+	"lastUpdated": "2022-11-09 01:44:01"
 }
 
 /**
@@ -70,10 +70,8 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item("encyclopediaArticle");
 	
-	//item.title = "测试";
 	item.title = ZU.xpathText(doc, '//div[@class="title col-xs-12 clearfix"]/h2[@class="fl"]');
 	Z.debug("title: "+item.title);	
-	//item.title = ZU.trimInternal((doc.getElementById('firstHeading') || doc.getElementById('section_0')).textContent);
 		
 	var update = ZU.xpathText(doc, '//div[@class="collectionbox clearfix "]/div[@class="fl time"]').replace(/最后更新 /,"")	; //最后更新日
 	Z.debug("最后更新日 " + update);
@@ -82,32 +80,28 @@ function scrape(doc, url) {
 	//const authors = doc.querySelectorAll("div#author-box > div.author.author-noshadow > span.n-author.mul-author > span.author-span > span");	
 	const authorbox = doc.getElementById("author-box");
 	const authors =authorbox.querySelectorAll("div.author.author-shadow > span.n-author > span.author-span.au-show > span");
-	//Z.debug("authors: " + authors);
 	Z.debug("authors.length: " + authors.length);
-	
-	//const authorbox = doc.getElementById("author-box");
-	var authors1 = authorbox.querySelectorAll("div.author.author-noshadow >  span.n-author.mul-author > span.author-span > span");
-	//Z.debug("authors1: " + authors1);
-	Z.debug("authors1.length: " + authors1.length);
 
 	if(authors.length > 1){
 		Z.debug("authors.length > 1");
 		for( i=0; i < authors.length; i=i+1){
-			item.creators.push(authors[i].textContent, "author");			
+			item.creators.push(
+				ZU.cleanAuthor(authors[i].textContent, "author", true)
+			);
 		}
 	}
 	else if(authors.length === 1)
 	{
-		item.creators.push(authors[0].textContent, "author");
+		ZU.cleanAuthor(authors[0].textContent, "author", true)
 	}
 
-	Z.debug("item.authors :"+ item.creators);
+	//Z.debug("item.creators :"+ item.creators);
 
 	item.encyclopediaTitle = '中国大百科全书';
 	item.edition = '第三版·网络版';
 	item.publisher = '中国大百科全书出版社';	
 
-	item.language = 'zh-cn';	
+	item.language = 'zh-CN';	
 
 	item.url = url;
 
@@ -121,6 +115,7 @@ function scrape(doc, url) {
 	item.complete();
 
 }
+
 
 
 /** BEGIN TEST CASES **/
