@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-10 08:06:45"
+	"lastUpdated": "2022-11-10 08:13:06"
 }
 
 /**
@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 			return "multiple";
 		}
 	}
-	else if(url.includes('historylist') || url.includes('tashuo') || url.includes('planet')) //exclude non-lemma-item 排除 他说/星球/历史列表
+	else if(url.includes('historylist') || url.includes('tashuo') || url.includes('planet') || url.includes('starmap') || url.includes('pic') ||url.includes('usercenter')) //exclude non-lemma-item 排除 他说/星球/历史列表/百科星图/图片/用户中心
 	{
 		return false;
 	}
