@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-10 07:35:49"
+	"lastUpdated": "2022-11-10 08:06:45"
 }
 
 /**
@@ -38,6 +38,10 @@ function detectWeb(doc, url) {
 		else {
 			return "multiple";
 		}
+	}
+	else if(url.includes('historylist') || url.includes('tashuo') || url.includes('planet')) //exclude non-lemma-item 排除 他说/星球/历史列表
+	{
+		return false;
 	}
 	else{
 		return "encyclopediaArticle";
