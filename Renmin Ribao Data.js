@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-11 15:58:21"
+	"lastUpdated": "2022-11-12 00:24:37"
 }
 
 function detectWeb(doc, url) {
@@ -69,17 +69,12 @@ function scrape(doc, url) {
 	//Z.debug(item.abstractNote);
 	
 	item.publicationTitle = "人民日报";	
-	item.ISSN = "672-8386";
+	item.ISSN = "1672-8386";
 	//item.CN = "11-0065"; //统一刊号
 
-	/* to do
-	var publicationDate = ZU.xpathText(doc, "(//div[@class='bd_block'])/span[@id='pubtime_baidu']");	
-	if (publicationDate) {
-		item.date = ZU.strToISO(publicationDate);
-	}
-	*/
-	//Z.debug(publicationDate);
-	
+	var d = doc.querySelectorAll('div.sha_left span');
+	item.date = d[0].innerText;
+	Z.debug(item.date);
 	
 	item.attachments.push({
 		title: "Snapshot",
@@ -96,7 +91,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"language": "zh-cn",
+				"language": "zh-CN",
 				"title": "李克强参观中柬文化遗产交流合作30年成果展并出席文物修复移交仪式"
 			}
 		]
