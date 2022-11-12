@@ -9,11 +9,17 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-12 00:24:37"
+	"lastUpdated": "2022-11-12 00:51:05"
 }
 
 function detectWeb(doc, url) {
-	return "newspaperArticle";
+	if(url.includes('qs')){ //搜索界面
+		return "multiple";
+	}
+	else {
+		return "newspaperArticle";
+	}
+	//to do 匹配新闻版面，不止单篇文章
 }
 
 function getSearchResults(doc, checkOnly) {
