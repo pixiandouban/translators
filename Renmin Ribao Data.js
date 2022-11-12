@@ -1,7 +1,7 @@
 {
 	"translatorID": "dbc3b499-88b6-4661-88c0-c27ac57ccd59",
 	"label": "Renmin Ribao Data",
-	"creator": "",
+	"creator": "pixiandouban",
 	"target": "^https?://data.people.com.cn/rmrb",
 	"minVersion": "5.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-12 00:51:05"
+	"lastUpdated": "2022-11-12 01:10:42"
 }
 
 function detectWeb(doc, url) {
