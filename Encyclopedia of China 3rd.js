@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-09 01:44:01"
+	"lastUpdated": "2022-11-18 01:47:53"
 }
 
 /**
@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.mw-search-result .mw-search-result-heading > a');
+	var rows = doc.querySelectorAll("h2.ellipsis.fl > a.font20.search-title");
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
